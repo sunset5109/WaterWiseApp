@@ -1,0 +1,1778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>WaterWise - Precision Irrigation AI</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%;font-family:'Inter',sans-serif}
+body{overflow-x:hidden;background:#f9fafb}
+input[type=range]{-webkit-appearance:none;appearance:none;height:4px;border-radius:4px;background:#d1fae5;outline:none;cursor:pointer;width:100%;display:block}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:#059669;border-radius:50%;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:pointer}
+select,input[type=number],textarea{font-family:'Inter',sans-serif}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:4px}
+button{cursor:pointer;font-family:'Inter',sans-serif}
+.lang-dropdown{position:relative;display:inline-block}
+.lang-menu{position:absolute;top:calc(100% + 6px);right:0;background:#fff;border:1px solid #e5e7eb;borderRadius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.12);min-width:160px;z-index:9999;border-radius:10px;overflow:hidden;display:none}
+.lang-menu.open{display:block}
+.lang-option{padding:9px 14px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:8px;color:#374151;font-family:'Inter',sans-serif}
+.lang-option:hover{background:#f0fdf4;color:#059669}
+.step-card{transition:transform 0.15s,box-shadow 0.15s}
+.step-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(5,150,105,0.12)}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+var useState = React.useState;
+var useEffect = React.useEffect;
+var useRef = React.useRef;
+var useContext = React.useContext;
+var createContext = React.createContext;
+
+var TEAL = "#0d9488";
+var GREEN = "#059669";
+var DARK = "#064e3b";
+var LIGHT = "#ecfdf5";
+var BORDER = "#a7f3d0";
+var GRAY = "#6b7280";
+
+// ── TRANSLATIONS ──────────────────────────────────────────────────────────────
+var LANGS = {
+  en: { label: "English", flag: "🇺🇸" },
+  es: { label: "Español", flag: "🇪🇸" },
+  hi: { label: "हिन्दी", flag: "🇮🇳" },
+  fr: { label: "Français", flag: "🇫🇷" },
+  pt: { label: "Português", flag: "🇧🇷" },
+  sw: { label: "Kiswahili", flag: "🇰🇪" },
+  vi: { label: "Tiếng Việt", flag: "🇻🇳" },
+};
+
+var T = {
+  en: {
+    brand: "WaterWise",
+    nav_analysis: "Analysis",
+    nav_research: "Research",
+    nav_community: "Community",
+    nav_learn: "Learn",
+    nav_about: "About",
+    nav_impact: "Impact",
+    nav_howto: "How-To Guide",
+    signin: "Sign In",
+    signout: "Sign Out",
+    hero_badge: "Science Fair 2026",
+    hero_h1a: "Water smarter.",
+    hero_h1b: "Grow more.",
+    hero_sub: "Precision irrigation intelligence powered by AI. Predicts soil moisture 7 days ahead, guided by satellite data and stochastic control — hardware for $60.",
+    hero_cta1: "Analyze My Farm",
+    hero_cta2: "Our Story",
+    hero_stat1: "Water saved, validated",
+    hero_stat2: "6 continents",
+    hero_stat3: "Full hardware cost",
+    howto_label: "Step-by-Step Guide",
+    howto_title: "How to Use WaterWise",
+    howto_sub: "Follow these simple steps to start saving water on your farm today.",
+    howto_step1_title: "Set Up Your Account",
+    howto_step1_desc: "Click 'Sign In' at the top right of the screen. Enter any email address and a password of 6 or more characters. Click 'Create Account'. You are now ready to use WaterWise.",
+    howto_step1_tip: "Use your real email so you can remember it next time.",
+    howto_step2_title: "Enter Your Farm Location",
+    howto_step2_desc: "After signing in, click 'Analyze My Farm'. Select the region closest to your farm from the dropdown menu. Then pick your soil type (if unsure, choose Loam — it works for most farms). Select what crop you are growing.",
+    howto_step2_tip: "Not sure of your soil type? Loam is the most common and a safe choice.",
+    howto_step3_title: "Tell Us About Your Field Right Now",
+    howto_step3_desc: "Move the sliders to match current conditions on your farm: How wet or dry is the soil today? What is the temperature? How much rain have you had this month? Wind speed and humidity if you know them.",
+    howto_step3_tip: "You can estimate — the system handles uncertainty automatically.",
+    howto_step4_title: "Run the 7-Day Forecast",
+    howto_step4_desc: "Click the green 'Run 7-Day Forecast' button. In about 1 second, WaterWise will show you a chart of predicted soil moisture for the next 7 days. The green line is the smart AI plan. The red dashed line is the old way. You want to stay above the horizontal lines.",
+    howto_step4_tip: "If the line dips below 'wilting point', irrigate immediately.",
+    howto_step5_title: "Read the Day-by-Day Table",
+    howto_step5_desc: "Below the chart is a table showing each day. Look at the 'Status' column. Green 'Optimal' means no action needed. Orange 'Deficit' means irrigate in the next 1-2 days. Red 'Wilting risk' means irrigate today.",
+    howto_step5_tip: "Check this table every morning for the best results.",
+    howto_step6_title: "See Your Water and Money Savings",
+    howto_step6_desc: "Click 'See Economic Impact'. WaterWise will show you how many cubic metres of water you will save per year, and how much money that saves you based on local water prices. Try changing the farm size to see bigger or smaller results.",
+    howto_step6_tip: "Share this page with your cooperative or water board to show the savings.",
+    howto_q_title: "Quick Reference: What the Numbers Mean",
+    howto_q_optimal: "Optimal (green): Soil has the right amount of water. Do nothing.",
+    howto_q_adequate: "Adequate (teal): Slightly below ideal. Monitor daily.",
+    howto_q_deficit: "Deficit (orange): Below target. Plan to irrigate in 1-2 days.",
+    howto_q_wilting: "Wilting Risk (red): Too dry. Irrigate today.",
+    howto_hardware_title: "Building the $60 Hardware Kit",
+    howto_hardware_sub: "You need only basic electronics. No special skills required.",
+    howto_h1: "Buy the parts",
+    howto_h1d: "Arduino Uno ($15), Capacitive soil moisture sensor ($8), DS18B20 temperature sensor ($6), small solar panel ($18), waterproof box ($8), wires ($5). Total: about $60.",
+    howto_h2: "Connect the sensors",
+    howto_h2d: "Push the soil sensor probe into the ground near your plant roots, about 20cm deep. Connect the temperature sensor nearby. Run wires to your Arduino in the waterproof box.",
+    howto_h3: "Power it up",
+    howto_h3d: "Connect the solar panel to the Arduino. Place the box somewhere with sunlight. The system runs automatically and takes readings every 30 minutes.",
+    howto_h4: "Enter readings into WaterWise",
+    howto_h4d: "Once per day (morning is best), read the soil moisture number from your sensor and enter it in Step 2 of the WaterWise analysis. That is all you need to do.",
+    howto_faq_title: "Frequently Asked Questions",
+    howto_faq1q: "Do I need the hardware to use WaterWise?",
+    howto_faq1a: "No. You can manually estimate your soil moisture using the slider and still get useful forecasts. The hardware just makes readings more accurate.",
+    howto_faq2q: "What if I do not know my soil type?",
+    howto_faq2a: "Select 'Loam'. It is the most common soil type worldwide and gives good results for most farms. You can update this later.",
+    howto_faq3q: "How often should I check the forecast?",
+    howto_faq3a: "Once a day in the morning is ideal. Check the Day 0 and Day 1 status. If either says 'Deficit' or 'Wilting Risk', irrigate that day.",
+    howto_faq4q: "Is WaterWise free?",
+    howto_faq4a: "Yes. WaterWise is free to use. The $60 cost is only if you want to build the physical sensor kit.",
+    howto_faq5q: "My region is not listed. What do I do?",
+    howto_faq5a: "Pick the region closest to you geographically. If you are in South Asia and not near Punjab, try Dhaka. The model adjusts to your local conditions via the weather sliders.",
+    getstarted: "Get Started Now",
+    footer_copy: "2026 WaterWise Smart Irrigation Platform",
+  },
+  es: {
+    brand: "WaterWise",
+    nav_analysis: "Análisis",
+    nav_research: "Investigación",
+    nav_community: "Comunidad",
+    nav_learn: "Aprender",
+    nav_howto: "Guía Práctica",
+    nav_about: "Acerca de",
+    nav_impact: "Impacto",
+    signin: "Iniciar Sesión",
+    signout: "Cerrar Sesión",
+    hero_badge: "Feria de Ciencias 2026",
+    hero_h1a: "Riegue con inteligencia.",
+    hero_h1b: "Cultive más.",
+    hero_sub: "Inteligencia de riego de precisión con IA. Predice la humedad del suelo 7 días antes, guiada por datos satelitales — hardware por $60.",
+    hero_cta1: "Analizar Mi Granja",
+    hero_cta2: "Nuestra Historia",
+    hero_stat1: "Agua ahorrada, validado",
+    hero_stat2: "6 continentes",
+    hero_stat3: "Costo total del hardware",
+    howto_label: "Guía Paso a Paso",
+    howto_title: "Cómo Usar WaterWise",
+    howto_sub: "Siga estos sencillos pasos para empezar a ahorrar agua en su granja hoy.",
+    howto_step1_title: "Crear Su Cuenta",
+    howto_step1_desc: "Haga clic en 'Iniciar Sesión' en la esquina superior derecha. Ingrese cualquier correo electrónico y una contraseña de 6 o más caracteres. Haga clic en 'Crear Cuenta'. Ya está listo para usar WaterWise.",
+    howto_step1_tip: "Use su correo real para recordarlo la próxima vez.",
+    howto_step2_title: "Ingrese la Ubicación de Su Granja",
+    howto_step2_desc: "Después de iniciar sesión, haga clic en 'Analizar Mi Granja'. Seleccione la región más cercana a su granja. Elija el tipo de suelo (si no está seguro, elija Loam). Seleccione su cultivo.",
+    howto_step2_tip: "¿No sabe su tipo de suelo? Loam es la elección más común y segura.",
+    howto_step3_title: "Díganos Sobre Su Campo Ahora",
+    howto_step3_desc: "Mueva los controles deslizantes para reflejar las condiciones actuales: ¿Qué tan húmedo o seco está el suelo hoy? ¿Cuál es la temperatura? ¿Cuánta lluvia ha tenido este mes?",
+    howto_step3_tip: "Puede estimar — el sistema maneja la incertidumbre automáticamente.",
+    howto_step4_title: "Ejecutar el Pronóstico de 7 Días",
+    howto_step4_desc: "Haga clic en el botón verde 'Ejecutar Pronóstico de 7 Días'. En 1 segundo, WaterWise mostrará un gráfico de humedad del suelo prevista para los próximos 7 días.",
+    howto_step4_tip: "Si la línea cae por debajo del 'punto de marchitamiento', riegue inmediatamente.",
+    howto_step5_title: "Leer la Tabla Día a Día",
+    howto_step5_desc: "Debajo del gráfico hay una tabla que muestra cada día. Mire la columna 'Estado'. Verde 'Óptimo' significa no se necesita acción. Naranja 'Déficit' significa riegue en 1-2 días. Rojo 'Riesgo de marchitamiento' significa riegue hoy.",
+    howto_step5_tip: "Revise esta tabla cada mañana para obtener mejores resultados.",
+    howto_step6_title: "Ver Sus Ahorros de Agua y Dinero",
+    howto_step6_desc: "Haga clic en 'Ver Impacto Económico'. WaterWise mostrará cuántos metros cúbicos de agua ahorrará por año y cuánto dinero representa eso.",
+    howto_step6_tip: "Comparta esta página con su cooperativa para mostrar los ahorros.",
+    howto_q_title: "Referencia Rápida: Qué Significan los Números",
+    howto_q_optimal: "Óptimo (verde): El suelo tiene la cantidad correcta de agua. No haga nada.",
+    howto_q_adequate: "Adecuado (verde azulado): Ligeramente por debajo del ideal. Monitorear diariamente.",
+    howto_q_deficit: "Déficit (naranja): Por debajo del objetivo. Planifique regar en 1-2 días.",
+    howto_q_wilting: "Riesgo de marchitamiento (rojo): Demasiado seco. Riegue hoy.",
+    howto_hardware_title: "Construir el Kit de Hardware de $60",
+    howto_hardware_sub: "Solo necesita electrónica básica. No se requieren habilidades especiales.",
+    howto_h1: "Compre las piezas",
+    howto_h1d: "Arduino Uno ($15), sensor de humedad del suelo capacitivo ($8), sensor de temperatura DS18B20 ($6), pequeño panel solar ($18), caja impermeable ($8), cables ($5). Total: unos $60.",
+    howto_h2: "Conecte los sensores",
+    howto_h2d: "Inserte la sonda del sensor de suelo en el suelo cerca de las raíces de su planta, a unos 20 cm de profundidad.",
+    howto_h3: "Enciéndalo",
+    howto_h3d: "Conecte el panel solar al Arduino. Coloque la caja en un lugar con luz solar. El sistema funciona automáticamente.",
+    howto_h4: "Ingrese lecturas en WaterWise",
+    howto_h4d: "Una vez al día (por la mañana es lo mejor), lea el número de humedad del suelo de su sensor e ingréselo en el Paso 2 del análisis de WaterWise.",
+    howto_faq_title: "Preguntas Frecuentes",
+    howto_faq1q: "¿Necesito el hardware para usar WaterWise?",
+    howto_faq1a: "No. Puede estimar manualmente la humedad del suelo con el control deslizante y aún obtener pronósticos útiles.",
+    howto_faq2q: "¿Qué pasa si no sé mi tipo de suelo?",
+    howto_faq2a: "Seleccione 'Loam'. Es el tipo de suelo más común y da buenos resultados para la mayoría de las granjas.",
+    howto_faq3q: "¿Con qué frecuencia debo revisar el pronóstico?",
+    howto_faq3a: "Una vez al día por la mañana es ideal. Si el estado dice 'Déficit' o 'Riesgo de Marchitamiento', riegue ese día.",
+    howto_faq4q: "¿WaterWise es gratuito?",
+    howto_faq4a: "Sí. WaterWise es gratuito. El costo de $60 es solo si quiere construir el kit de sensores físicos.",
+    howto_faq5q: "Mi región no está en la lista. ¿Qué hago?",
+    howto_faq5a: "Elija la región geográficamente más cercana a usted.",
+    getstarted: "Comenzar Ahora",
+    footer_copy: "2026 WaterWise Plataforma de Riego Inteligente",
+  },
+  hi: {
+    brand: "WaterWise",
+    nav_analysis: "विश्लेषण",
+    nav_research: "अनुसंधान",
+    nav_community: "समुदाय",
+    nav_learn: "सीखें",
+    nav_howto: "कैसे करें गाइड",
+    nav_about: "हमारे बारे में",
+    nav_impact: "प्रभाव",
+    signin: "साइन इन",
+    signout: "साइन आउट",
+    hero_badge: "साइंस फेयर 2026",
+    hero_h1a: "चतुराई से सींचें।",
+    hero_h1b: "अधिक उगाएं।",
+    hero_sub: "AI द्वारा संचालित सटीक सिंचाई। 7 दिन पहले मिट्टी की नमी का पूर्वानुमान — $60 के हार्डवेयर के साथ।",
+    hero_cta1: "अपना खेत जांचें",
+    hero_cta2: "हमारी कहानी",
+    hero_stat1: "पानी की बचत, सत्यापित",
+    hero_stat2: "6 महाद्वीप",
+    hero_stat3: "पूरी हार्डवेयर लागत",
+    howto_label: "चरण-दर-चरण मार्गदर्शिका",
+    howto_title: "WaterWise कैसे उपयोग करें",
+    howto_sub: "आज से अपने खेत में पानी बचाना शुरू करने के लिए इन सरल चरणों का पालन करें।",
+    howto_step1_title: "अपना खाता बनाएं",
+    howto_step1_desc: "ऊपर दाईं ओर 'साइन इन' पर क्लिक करें। कोई भी ईमेल और 6 या अधिक अक्षरों का पासवर्ड डालें। 'खाता बनाएं' पर क्लिक करें।",
+    howto_step1_tip: "अपना असली ईमेल उपयोग करें ताकि अगली बार याद रहे।",
+    howto_step2_title: "अपने खेत का स्थान दर्ज करें",
+    howto_step2_desc: "साइन इन के बाद 'अपना खेत जांचें' पर क्लिक करें। ड्रॉपडाउन से अपने खेत के सबसे नजदीकी क्षेत्र का चयन करें। मिट्टी का प्रकार चुनें (अनिश्चित हों तो Loam चुनें)। अपनी फसल चुनें।",
+    howto_step2_tip: "मिट्टी का प्रकार नहीं पता? Loam सबसे आम और सुरक्षित विकल्प है।",
+    howto_step3_title: "अभी अपने खेत की स्थिति बताएं",
+    howto_step3_desc: "अपने खेत की मौजूदा स्थिति से मेल खाने के लिए स्लाइडर को हिलाएं: आज मिट्टी कितनी गीली या सूखी है? तापमान क्या है? इस महीने कितनी बारिश हुई?",
+    howto_step3_tip: "आप अनुमान लगा सकते हैं — सिस्टम स्वचालित रूप से अनिश्चितता को संभालता है।",
+    howto_step4_title: "7-दिन का पूर्वानुमान चलाएं",
+    howto_step4_desc: "हरे 'Run 7-Day Forecast' बटन पर क्लिक करें। लगभग 1 सेकंड में, WaterWise अगले 7 दिनों के लिए मिट्टी की नमी का चार्ट दिखाएगा।",
+    howto_step4_tip: "यदि रेखा 'मुरझाने बिंदु' से नीचे जाए, तुरंत सिंचाई करें।",
+    howto_step5_title: "दिन-दर-दिन तालिका पढ़ें",
+    howto_step5_desc: "चार्ट के नीचे एक तालिका है। 'स्थिति' कॉलम देखें। हरा 'Optimal' मतलब कोई कार्रवाई जरूरी नहीं। नारंगी 'Deficit' मतलब 1-2 दिनों में सिंचाई करें। लाल मतलब आज सिंचाई करें।",
+    howto_step5_tip: "सर्वोत्तम परिणामों के लिए हर सुबह यह तालिका देखें।",
+    howto_step6_title: "पानी और पैसे की बचत देखें",
+    howto_step6_desc: "See Economic Impact पर क्लिक करें। WaterWise दिखाएगा कि आप प्रति वर्ष कितना पानी और पैसा बचाएंगे।",
+    howto_step6_tip: "इस पेज को अपनी सहकारी समिति के साथ साझा करें।",
+    howto_q_title: "त्वरित संदर्भ: संख्याओं का अर्थ",
+    howto_q_optimal: "Optimal (हरा): मिट्टी में सही मात्रा में पानी है। कुछ न करें।",
+    howto_q_adequate: "Adequate (नीला-हरा): आदर्श से थोड़ा कम। रोज निगरानी करें।",
+    howto_q_deficit: "Deficit (नारंगी): लक्ष्य से कम। 1-2 दिनों में सिंचाई की योजना बनाएं।",
+    howto_q_wilting: "Wilting Risk (लाल): बहुत सूखा। आज सिंचाई करें।",
+    howto_hardware_title: "$60 के हार्डवेयर किट का निर्माण",
+    howto_hardware_sub: "केवल बुनियादी इलेक्ट्रॉनिक्स की आवश्यकता है। कोई विशेष कौशल आवश्यक नहीं।",
+    howto_h1: "पुर्जे खरीदें",
+    howto_h1d: "Arduino Uno ($15), मिट्टी नमी सेंसर ($8), DS18B20 तापमान सेंसर ($6), सोलर पैनल ($18), वाटरप्रूफ बॉक्स ($8), तार ($5)। कुल: लगभग $60।",
+    howto_h2: "सेंसर जोड़ें",
+    howto_h2d: "मिट्टी सेंसर प्रोब को पौधे की जड़ों के पास जमीन में लगभग 20 सेमी गहरा डालें।",
+    howto_h3: "चालू करें",
+    howto_h3d: "सोलर पैनल को Arduino से जोड़ें। बॉक्स को धूप वाली जगह रखें। सिस्टम स्वचालित रूप से चलेगा।",
+    howto_h4: "WaterWise में रीडिंग दर्ज करें",
+    howto_h4d: "दिन में एक बार (सुबह सबसे अच्छा) सेंसर से मिट्टी नमी नंबर पढ़ें और WaterWise विश्लेषण के चरण 2 में दर्ज करें।",
+    howto_faq_title: "अक्सर पूछे जाने वाले प्रश्न",
+    howto_faq1q: "क्या WaterWise उपयोग करने के लिए हार्डवेयर जरूरी है?",
+    howto_faq1a: "नहीं। आप स्लाइडर से मिट्टी की नमी का अनुमान लगा सकते हैं और उपयोगी पूर्वानुमान प्राप्त कर सकते हैं।",
+    howto_faq2q: "अगर मुझे अपनी मिट्टी का प्रकार नहीं पता तो क्या करूं?",
+    howto_faq2a: "'Loam' चुनें। यह दुनिया में सबसे आम मिट्टी का प्रकार है।",
+    howto_faq3q: "मुझे कितनी बार पूर्वानुमान जांचना चाहिए?",
+    howto_faq3a: "दिन में एक बार सुबह आदर्श है। यदि स्थिति 'Deficit' या 'Wilting Risk' दिखाए, उस दिन सिंचाई करें।",
+    howto_faq4q: "क्या WaterWise मुफ्त है?",
+    howto_faq4a: "हां। WaterWise उपयोग करने के लिए मुफ्त है। $60 की लागत केवल भौतिक सेंसर किट के लिए है।",
+    howto_faq5q: "मेरा क्षेत्र सूची में नहीं है। क्या करूं?",
+    howto_faq5a: "भौगोलिक रूप से आपके सबसे नजदीकी क्षेत्र चुनें।",
+    getstarted: "अभी शुरू करें",
+    footer_copy: "2026 WaterWise स्मार्ट सिंचाई प्लेटफ़ॉर्म",
+  },
+  fr: {
+    brand: "WaterWise",
+    nav_analysis: "Analyse",
+    nav_research: "Recherche",
+    nav_community: "Communauté",
+    nav_learn: "Apprendre",
+    nav_howto: "Guide Pratique",
+    nav_about: "À Propos",
+    nav_impact: "Impact",
+    signin: "Se Connecter",
+    signout: "Se Déconnecter",
+    hero_badge: "Foire Scientifique 2026",
+    hero_h1a: "Irriguer plus intelligemment.",
+    hero_h1b: "Cultiver davantage.",
+    hero_sub: "Intelligence d'irrigation de précision par IA. Prédit l'humidité du sol 7 jours à l'avance, guidée par des données satellitaires — matériel à 60$.",
+    hero_cta1: "Analyser Ma Ferme",
+    hero_cta2: "Notre Histoire",
+    hero_stat1: "Eau économisée, validé",
+    hero_stat2: "6 continents",
+    hero_stat3: "Coût total du matériel",
+    howto_label: "Guide Étape par Étape",
+    howto_title: "Comment Utiliser WaterWise",
+    howto_sub: "Suivez ces étapes simples pour commencer à économiser l'eau sur votre ferme aujourd'hui.",
+    howto_step1_title: "Créer Votre Compte",
+    howto_step1_desc: "Cliquez sur 'Se Connecter' en haut à droite. Entrez n'importe quelle adresse e-mail et un mot de passe d'au moins 6 caractères. Cliquez sur 'Créer un Compte'.",
+    howto_step1_tip: "Utilisez votre vrai e-mail pour vous en souvenir la prochaine fois.",
+    howto_step2_title: "Entrez l'Emplacement de Votre Ferme",
+    howto_step2_desc: "Après la connexion, cliquez sur 'Analyser Ma Ferme'. Sélectionnez la région la plus proche de votre ferme. Choisissez le type de sol (si incertain, choisissez Loam). Sélectionnez votre culture.",
+    howto_step2_tip: "Vous ne connaissez pas votre type de sol? Loam est le choix le plus commun.",
+    howto_step3_title: "Décrivez Votre Champ Maintenant",
+    howto_step3_desc: "Déplacez les curseurs pour correspondre aux conditions actuelles: Quelle est l'humidité du sol aujourd'hui? Quelle est la température? Quelle est la pluviométrie ce mois-ci?",
+    howto_step3_tip: "Vous pouvez estimer — le système gère l'incertitude automatiquement.",
+    howto_step4_title: "Lancer la Prévision sur 7 Jours",
+    howto_step4_desc: "Cliquez sur le bouton vert 'Lancer la Prévision 7 Jours'. En environ 1 seconde, WaterWise affichera un graphique de l'humidité du sol prévue pour les 7 prochains jours.",
+    howto_step4_tip: "Si la ligne descend sous le 'point de flétrissement', irriguez immédiatement.",
+    howto_step5_title: "Lire le Tableau Jour par Jour",
+    howto_step5_desc: "Sous le graphique se trouve un tableau. Regardez la colonne 'Statut'. Vert 'Optimal' signifie aucune action. Orange 'Déficit' signifie irriguer dans 1-2 jours. Rouge signifie irriguer aujourd'hui.",
+    howto_step5_tip: "Vérifiez ce tableau chaque matin pour les meilleurs résultats.",
+    howto_step6_title: "Voir Vos Économies d'Eau et d'Argent",
+    howto_step6_desc: "Cliquez sur 'Voir l'Impact Économique'. WaterWise vous montrera combien de mètres cubes d'eau vous économiserez par an et l'argent économisé.",
+    howto_step6_tip: "Partagez cette page avec votre coopérative pour montrer les économies.",
+    howto_q_title: "Référence Rapide: Signification des Chiffres",
+    howto_q_optimal: "Optimal (vert): Le sol a la bonne quantité d'eau. Ne rien faire.",
+    howto_q_adequate: "Adéquat (bleu-vert): Légèrement en dessous de l'idéal. Surveiller quotidiennement.",
+    howto_q_deficit: "Déficit (orange): En dessous de la cible. Planifier d'irriguer dans 1-2 jours.",
+    howto_q_wilting: "Risque de flétrissement (rouge): Trop sec. Irriguer aujourd'hui.",
+    howto_hardware_title: "Construire le Kit Matériel à 60$",
+    howto_hardware_sub: "Vous n'avez besoin que d'électronique de base. Aucune compétence spéciale requise.",
+    howto_h1: "Achetez les pièces",
+    howto_h1d: "Arduino Uno ($15), capteur d'humidité du sol ($8), capteur de température DS18B20 ($6), petit panneau solaire ($18), boîte étanche ($8), fils ($5). Total: environ 60$.",
+    howto_h2: "Connectez les capteurs",
+    howto_h2d: "Insérez la sonde du capteur de sol dans le sol près des racines de votre plante, à environ 20 cm de profondeur.",
+    howto_h3: "Mettez sous tension",
+    howto_h3d: "Connectez le panneau solaire à l'Arduino. Placez la boîte dans un endroit ensoleillé. Le système fonctionne automatiquement.",
+    howto_h4: "Entrez les lectures dans WaterWise",
+    howto_h4d: "Une fois par jour (le matin est préférable), lisez le numéro d'humidité du sol de votre capteur et entrez-le à l'étape 2 de l'analyse WaterWise.",
+    howto_faq_title: "Questions Fréquentes",
+    howto_faq1q: "Ai-je besoin du matériel pour utiliser WaterWise?",
+    howto_faq1a: "Non. Vous pouvez estimer manuellement l'humidité du sol avec le curseur.",
+    howto_faq2q: "Que faire si je ne connais pas mon type de sol?",
+    howto_faq2a: "Sélectionnez 'Loam'. C'est le type de sol le plus courant.",
+    howto_faq3q: "À quelle fréquence dois-je consulter la prévision?",
+    howto_faq3a: "Une fois par matin est idéal. Si le statut indique 'Déficit' ou 'Risque de flétrissement', irriguez ce jour-là.",
+    howto_faq4q: "WaterWise est-il gratuit?",
+    howto_faq4a: "Oui. WaterWise est gratuit. Le coût de 60$ concerne uniquement le kit de capteurs physiques.",
+    howto_faq5q: "Ma région n'est pas dans la liste. Que faire?",
+    howto_faq5a: "Choisissez la région géographiquement la plus proche de vous.",
+    getstarted: "Commencer Maintenant",
+    footer_copy: "2026 WaterWise Plateforme d'Irrigation Intelligente",
+  },
+  pt: {
+    brand: "WaterWise",
+    nav_analysis: "Análise",
+    nav_research: "Pesquisa",
+    nav_community: "Comunidade",
+    nav_learn: "Aprender",
+    nav_howto: "Guia Prático",
+    nav_about: "Sobre",
+    nav_impact: "Impacto",
+    signin: "Entrar",
+    signout: "Sair",
+    hero_badge: "Feira de Ciências 2026",
+    hero_h1a: "Irrigue com inteligência.",
+    hero_h1b: "Produza mais.",
+    hero_sub: "Inteligência de irrigação de precisão com IA. Prevê a umidade do solo 7 dias antes, orientada por dados de satélite — hardware por $60.",
+    hero_cta1: "Analisar Minha Fazenda",
+    hero_cta2: "Nossa História",
+    hero_stat1: "Água economizada, validado",
+    hero_stat2: "6 continentes",
+    hero_stat3: "Custo total do hardware",
+    howto_label: "Guia Passo a Passo",
+    howto_title: "Como Usar o WaterWise",
+    howto_sub: "Siga estes passos simples para começar a economizar água em sua fazenda hoje.",
+    howto_step1_title: "Criar Sua Conta",
+    howto_step1_desc: "Clique em 'Entrar' no canto superior direito. Digite qualquer e-mail e uma senha de 6 ou mais caracteres. Clique em 'Criar Conta'.",
+    howto_step1_tip: "Use seu e-mail real para lembrar na próxima vez.",
+    howto_step2_title: "Inserir Localização da Fazenda",
+    howto_step2_desc: "Após entrar, clique em 'Analisar Minha Fazenda'. Selecione a região mais próxima da sua fazenda. Escolha o tipo de solo (se incerto, escolha Loam). Selecione sua cultura.",
+    howto_step2_tip: "Não sabe o tipo de solo? Loam é a escolha mais comum e segura.",
+    howto_step3_title: "Informe as Condições Atuais do Campo",
+    howto_step3_desc: "Mova os controles deslizantes para refletir as condições atuais: Quão úmido ou seco está o solo hoje? Qual é a temperatura? Quanto choveu este mês?",
+    howto_step3_tip: "Você pode estimar — o sistema lida automaticamente com a incerteza.",
+    howto_step4_title: "Executar Previsão de 7 Dias",
+    howto_step4_desc: "Clique no botão verde 'Executar Previsão de 7 Dias'. Em cerca de 1 segundo, o WaterWise exibirá um gráfico da umidade do solo prevista para os próximos 7 dias.",
+    howto_step4_tip: "Se a linha cair abaixo do 'ponto de murchamento', irrigue imediatamente.",
+    howto_step5_title: "Ler a Tabela Dia a Dia",
+    howto_step5_desc: "Abaixo do gráfico há uma tabela. Veja a coluna 'Status'. Verde 'Ideal' significa sem ação. Laranja 'Déficit' significa irrigar em 1-2 dias. Vermelho significa irrigar hoje.",
+    howto_step5_tip: "Verifique esta tabela toda manhã para melhores resultados.",
+    howto_step6_title: "Ver Economia de Água e Dinheiro",
+    howto_step6_desc: "Clique em 'Ver Impacto Econômico'. O WaterWise mostrará quantos metros cúbicos de água você economizará por ano e quanto dinheiro isso representa.",
+    howto_step6_tip: "Compartilhe esta página com sua cooperativa para mostrar as economias.",
+    howto_q_title: "Referência Rápida: O Que os Números Significam",
+    howto_q_optimal: "Ideal (verde): Solo com a quantidade certa de água. Não faça nada.",
+    howto_q_adequate: "Adequado (azul-verde): Ligeiramente abaixo do ideal. Monitorar diariamente.",
+    howto_q_deficit: "Déficit (laranja): Abaixo da meta. Planejar irrigar em 1-2 dias.",
+    howto_q_wilting: "Risco de Murchamento (vermelho): Muito seco. Irrigar hoje.",
+    howto_hardware_title: "Construir o Kit de Hardware de $60",
+    howto_hardware_sub: "Você precisa apenas de eletrônica básica. Nenhuma habilidade especial necessária.",
+    howto_h1: "Compre as peças",
+    howto_h1d: "Arduino Uno ($15), sensor de umidade do solo ($8), sensor de temperatura DS18B20 ($6), painel solar pequeno ($18), caixa à prova d'água ($8), fios ($5). Total: cerca de $60.",
+    howto_h2: "Conecte os sensores",
+    howto_h2d: "Insira a sonda do sensor de solo no chão perto das raízes da planta, cerca de 20 cm de profundidade.",
+    howto_h3: "Ligue",
+    howto_h3d: "Conecte o painel solar ao Arduino. Coloque a caixa em local com luz solar. O sistema funciona automaticamente.",
+    howto_h4: "Insira leituras no WaterWise",
+    howto_h4d: "Uma vez por dia (manhã é o melhor), leia o número de umidade do solo do sensor e insira-o no Passo 2 da análise WaterWise.",
+    howto_faq_title: "Perguntas Frequentes",
+    howto_faq1q: "Preciso do hardware para usar o WaterWise?",
+    howto_faq1a: "Não. Você pode estimar manualmente a umidade do solo com o controle deslizante.",
+    howto_faq2q: "E se eu não souber meu tipo de solo?",
+    howto_faq2a: "Selecione 'Loam'. É o tipo de solo mais comum no mundo.",
+    howto_faq3q: "Com que frequência devo verificar a previsão?",
+    howto_faq3a: "Uma vez por manhã é ideal. Se o status indicar 'Déficit' ou 'Risco de Murchamento', irrigue naquele dia.",
+    howto_faq4q: "O WaterWise é gratuito?",
+    howto_faq4a: "Sim. O WaterWise é gratuito. O custo de $60 é apenas para o kit físico de sensores.",
+    howto_faq5q: "Minha região não está na lista. O que faço?",
+    howto_faq5a: "Escolha a região geograficamente mais próxima de você.",
+    getstarted: "Começar Agora",
+    footer_copy: "2026 WaterWise Plataforma de Irrigação Inteligente",
+  },
+  sw: {
+    brand: "WaterWise",
+    nav_analysis: "Uchambuzi",
+    nav_research: "Utafiti",
+    nav_community: "Jamii",
+    nav_learn: "Jifunze",
+    nav_howto: "Mwongozo wa Hatua",
+    nav_about: "Kuhusu",
+    nav_impact: "Athari",
+    signin: "Ingia",
+    signout: "Toka",
+    hero_badge: "Maonyesho ya Sayansi 2026",
+    hero_h1a: "Mwagilia kwa akili.",
+    hero_h1b: "Zaa zaidi.",
+    hero_sub: "Akili ya umwagiliaji sahihi inayoendeshwa na AI. Inatabiri unyevu wa udongo siku 7 mapema, ikongozwa na data ya setilaiti — vifaa kwa $60.",
+    hero_cta1: "Changanua Shamba Langu",
+    hero_cta2: "Hadithi Yetu",
+    hero_stat1: "Maji yaliyookolewa, yamethibitishwa",
+    hero_stat2: "Mabara 6",
+    hero_stat3: "Gharama kamili ya vifaa",
+    howto_label: "Mwongozo wa Hatua kwa Hatua",
+    howto_title: "Jinsi ya Kutumia WaterWise",
+    howto_sub: "Fuata hatua hizi rahisi kuanza kuokoa maji shambani kwako leo.",
+    howto_step1_title: "Fungua Akaunti Yako",
+    howto_step1_desc: "Bonyeza 'Ingia' juu kulia. Ingiza barua pepe yoyote na nywila ya herufi 6 au zaidi. Bonyeza 'Fungua Akaunti'.",
+    howto_step1_tip: "Tumia barua pepe halisi ili ukumbuke mara ijayo.",
+    howto_step2_title: "Ingiza Eneo la Shamba Lako",
+    howto_step2_desc: "Baada ya kuingia, bonyeza 'Changanua Shamba Langu'. Chagua eneo lililo karibu na shamba lako. Chagua aina ya udongo (kama hujui, chagua Loam). Chagua zao lako.",
+    howto_step2_tip: "Hujui aina ya udongo? Loam ni chaguo la kawaida na salama zaidi.",
+    howto_step3_title: "Tuambie Hali ya Shamba Sasa Hivi",
+    howto_step3_desc: "Sogeza vipandikizi ili vilingane na hali za sasa: Je, udongo una unyevu kiasi gani leo? Joto ni gani? Mvua ngapi mwezi huu?",
+    howto_step3_tip: "Unaweza kukisia — mfumo hushughulikia kutokuwa na uhakika otomatiki.",
+    howto_step4_title: "Endesha Utabiri wa Siku 7",
+    howto_step4_desc: "Bonyeza kitufe cha kijani 'Endesha Utabiri wa Siku 7'. Katika sekunde 1, WaterWise itaonyesha chati ya unyevu wa udongo uliotabiriwa kwa siku 7 zijazo.",
+    howto_step4_tip: "Kama mstari unashuka chini ya 'hatua ya kunyauka', mwagilia mara moja.",
+    howto_step5_title: "Soma Jedwali la Kila Siku",
+    howto_step5_desc: "Chini ya chati kuna jedwali. Tazama safu 'Hali'. Kijani 'Bora' maana hakuna hatua. Machungwa 'Upungufu' maana mwagilia ndani ya siku 1-2. Nyekundu maana mwagilia leo.",
+    howto_step5_tip: "Angalia jedwali hili kila asubuhi kwa matokeo bora.",
+    howto_step6_title: "Ona Akiba Yako ya Maji na Pesa",
+    howto_step6_desc: "Bonyeza 'Ona Athari ya Kiuchumi'. WaterWise itaonyesha ni mita za ujazo ngapi za maji utaokoa kwa mwaka na pesa ngapi hiyo inawakilisha.",
+    howto_step6_tip: "Shiriki ukurasa huu na ushirika wako kuonyesha akiba.",
+    howto_q_title: "Marejeo ya Haraka: Nambari Zinamaanisha Nini",
+    howto_q_optimal: "Bora (kijani): Udongo una maji ya kutosha. Usifanye chochote.",
+    howto_q_adequate: "Kutosha (bluu-kijani): Chini kidogo ya bora. Fuatilia kila siku.",
+    howto_q_deficit: "Upungufu (machungwa): Chini ya lengo. Panga kumwagilia ndani ya siku 1-2.",
+    howto_q_wilting: "Hatari ya Kunyauka (nyekundu): Kame sana. Mwagilia leo.",
+    howto_hardware_title: "Kujenga Kifaa cha $60",
+    howto_hardware_sub: "Unahitaji tu elektroniki ya msingi. Hakuna ujuzi maalum unaohitajika.",
+    howto_h1: "Nunua vipande",
+    howto_h1d: "Arduino Uno ($15), kipimo cha unyevu wa udongo ($8), kipimo cha joto DS18B20 ($6), paneli ndogo ya jua ($18), sanduku la kuzuia maji ($8), nyaya ($5). Jumla: karibu $60.",
+    howto_h2: "Unganisha vipimo",
+    howto_h2d: "Ingiza uchunguzi wa kipimo cha udongo ndani ya ardhi karibu na mizizi ya mmea wako, kina cha sentimita 20.",
+    howto_h3: "Washa",
+    howto_h3d: "Unganisha paneli ya jua na Arduino. Weka sanduku mahali penye jua. Mfumo utafanya kazi otomatiki.",
+    howto_h4: "Ingiza usomaji katika WaterWise",
+    howto_h4d: "Mara moja kwa siku (asubuhi ni bora), soma nambari ya unyevu wa udongo kutoka kwa kipimo chako na iingize katika Hatua ya 2 ya uchambuzi wa WaterWise.",
+    howto_faq_title: "Maswali Yanayoulizwa Mara Kwa Mara",
+    howto_faq1q: "Je, ninahitaji vifaa kutumia WaterWise?",
+    howto_faq1a: "Hapana. Unaweza kukisia unyevu wa udongo kwa mkono ukitumia kipandikizi na bado kupata utabiri muhimu.",
+    howto_faq2q: "Nifanye nini kama sijui aina ya udongo wangu?",
+    howto_faq2a: "Chagua 'Loam'. Ni aina ya kawaida zaidi ya udongo duniani.",
+    howto_faq3q: "Ninapaswa kuangalia utabiri mara ngapi?",
+    howto_faq3a: "Mara moja asubuhi ni bora. Kama hali inasema 'Upungufu' au 'Hatari ya Kunyauka', mwagilia siku hiyo.",
+    howto_faq4q: "Je, WaterWise ni bure?",
+    howto_faq4a: "Ndiyo. WaterWise ni bure kutumia. Gharama ya $60 ni kwa ajili ya kifaa cha vipimo tu.",
+    howto_faq5q: "Eneo langu halipo kwenye orodha. Nifanye nini?",
+    howto_faq5a: "Chagua eneo lililo karibu nawe kijiografia.",
+    getstarted: "Anza Sasa",
+    footer_copy: "2026 WaterWise Jukwaa la Umwagiliaji Mahiri",
+  },
+  vi: {
+    brand: "WaterWise",
+    nav_analysis: "Phân tích",
+    nav_research: "Nghiên cứu",
+    nav_community: "Cộng đồng",
+    nav_learn: "Học tập",
+    nav_howto: "Hướng dẫn sử dụng",
+    nav_about: "Về chúng tôi",
+    nav_impact: "Tác động",
+    signin: "Đăng nhập",
+    signout: "Đăng xuất",
+    hero_badge: "Hội chợ Khoa học 2026",
+    hero_h1a: "Tưới thông minh hơn.",
+    hero_h1b: "Thu hoạch nhiều hơn.",
+    hero_sub: "Hệ thống tưới tiêu thông minh bằng AI. Dự đoán độ ẩm đất 7 ngày trước, dựa trên dữ liệu vệ tinh — phần cứng chỉ $60.",
+    hero_cta1: "Phân tích Nông trại",
+    hero_cta2: "Câu chuyện của chúng tôi",
+    hero_stat1: "Tiết kiệm nước, đã xác minh",
+    hero_stat2: "6 châu lục",
+    hero_stat3: "Chi phí phần cứng đầy đủ",
+    howto_label: "Hướng dẫn từng bước",
+    howto_title: "Cách sử dụng WaterWise",
+    howto_sub: "Làm theo các bước đơn giản này để bắt đầu tiết kiệm nước trên nông trại của bạn ngay hôm nay.",
+    howto_step1_title: "Tạo tài khoản của bạn",
+    howto_step1_desc: "Nhấp 'Đăng nhập' ở góc trên bên phải. Nhập bất kỳ địa chỉ email và mật khẩu từ 6 ký tự trở lên. Nhấp 'Tạo tài khoản'.",
+    howto_step1_tip: "Dùng email thật để nhớ lần sau.",
+    howto_step2_title: "Nhập vị trí nông trại",
+    howto_step2_desc: "Sau khi đăng nhập, nhấp 'Phân tích Nông trại'. Chọn khu vực gần nhất với nông trại của bạn. Chọn loại đất (nếu không chắc, chọn Loam). Chọn cây trồng.",
+    howto_step2_tip: "Không biết loại đất? Loam là lựa chọn phổ biến và an toàn nhất.",
+    howto_step3_title: "Cho chúng tôi biết tình trạng đồng ruộng hiện tại",
+    howto_step3_desc: "Di chuyển các thanh trượt để phản ánh điều kiện hiện tại: Đất ẩm hay khô hôm nay? Nhiệt độ bao nhiêu? Lượng mưa tháng này?",
+    howto_step3_tip: "Bạn có thể ước tính — hệ thống tự động xử lý sự không chắc chắn.",
+    howto_step4_title: "Chạy dự báo 7 ngày",
+    howto_step4_desc: "Nhấp nút xanh 'Chạy dự báo 7 ngày'. Trong khoảng 1 giây, WaterWise sẽ hiển thị biểu đồ độ ẩm đất dự đoán cho 7 ngày tới.",
+    howto_step4_tip: "Nếu đường thẳng xuống dưới 'điểm héo úa', hãy tưới ngay.",
+    howto_step5_title: "Đọc bảng theo ngày",
+    howto_step5_desc: "Dưới biểu đồ có bảng. Xem cột 'Trạng thái'. Xanh 'Tối ưu' nghĩa là không cần làm gì. Cam 'Thiếu hụt' nghĩa là tưới trong 1-2 ngày. Đỏ nghĩa là tưới hôm nay.",
+    howto_step5_tip: "Kiểm tra bảng này mỗi sáng để có kết quả tốt nhất.",
+    howto_step6_title: "Xem mức tiết kiệm nước và tiền",
+    howto_step6_desc: "Nhấp 'Xem tác động kinh tế'. WaterWise sẽ cho bạn biết bạn tiết kiệm bao nhiêu mét khối nước mỗi năm và số tiền tương ứng.",
+    howto_step6_tip: "Chia sẻ trang này với hợp tác xã của bạn để chứng minh tiết kiệm.",
+    howto_q_title: "Tham khảo nhanh: Ý nghĩa các con số",
+    howto_q_optimal: "Tối ưu (xanh): Đất có đủ nước. Không cần làm gì.",
+    howto_q_adequate: "Đủ (xanh lam): Hơi thấp hơn lý tưởng. Theo dõi hàng ngày.",
+    howto_q_deficit: "Thiếu hụt (cam): Dưới mục tiêu. Lên kế hoạch tưới trong 1-2 ngày.",
+    howto_q_wilting: "Nguy cơ héo (đỏ): Quá khô. Tưới hôm nay.",
+    howto_hardware_title: "Xây dựng bộ phần cứng $60",
+    howto_hardware_sub: "Bạn chỉ cần điện tử cơ bản. Không cần kỹ năng đặc biệt.",
+    howto_h1: "Mua linh kiện",
+    howto_h1d: "Arduino Uno ($15), cảm biến độ ẩm đất ($8), cảm biến nhiệt độ DS18B20 ($6), tấm pin mặt trời nhỏ ($18), hộp chống nước ($8), dây ($5). Tổng: khoảng $60.",
+    howto_h2: "Kết nối cảm biến",
+    howto_h2d: "Cắm đầu dò cảm biến đất vào đất gần rễ cây của bạn, sâu khoảng 20 cm.",
+    howto_h3: "Bật nguồn",
+    howto_h3d: "Kết nối tấm pin mặt trời với Arduino. Đặt hộp ở nơi có ánh nắng. Hệ thống sẽ tự động hoạt động.",
+    howto_h4: "Nhập số liệu vào WaterWise",
+    howto_h4d: "Mỗi ngày một lần (buổi sáng là tốt nhất), đọc số độ ẩm đất từ cảm biến và nhập vào Bước 2 của phân tích WaterWise.",
+    howto_faq_title: "Câu hỏi thường gặp",
+    howto_faq1q: "Tôi có cần phần cứng để sử dụng WaterWise không?",
+    howto_faq1a: "Không. Bạn có thể ước tính độ ẩm đất bằng tay qua thanh trượt và vẫn nhận được dự báo hữu ích.",
+    howto_faq2q: "Nếu tôi không biết loại đất của mình thì sao?",
+    howto_faq2a: "Chọn 'Loam'. Đây là loại đất phổ biến nhất trên thế giới.",
+    howto_faq3q: "Tôi nên kiểm tra dự báo bao lâu một lần?",
+    howto_faq3a: "Một lần vào buổi sáng là lý tưởng. Nếu trạng thái cho thấy 'Thiếu hụt' hoặc 'Nguy cơ héo', hãy tưới ngày hôm đó.",
+    howto_faq4q: "WaterWise có miễn phí không?",
+    howto_faq4a: "Có. WaterWise miễn phí sử dụng. Chi phí $60 chỉ dành cho bộ cảm biến vật lý.",
+    howto_faq5q: "Khu vực của tôi không có trong danh sách. Tôi phải làm gì?",
+    howto_faq5a: "Chọn khu vực gần bạn nhất về mặt địa lý.",
+    getstarted: "Bắt đầu ngay",
+    footer_copy: "2026 WaterWise Nền tảng Tưới tiêu Thông minh",
+  },
+};
+
+var LangContext = createContext({lang:"en", t: T["en"]});
+
+// ── DATA ───────────────────────────────────────────────────────────────────────
+var SITES = [
+  {name:"Fresno, California",s:34.0,base:10000,cost:0.25,crop:"Almonds/Grapes"},
+  {name:"Lexington, Kentucky",s:32.7,base:8000,cost:0.22,crop:"Tobacco/Corn"},
+  {name:"Lincoln, Nebraska",s:30.5,base:9000,cost:0.18,crop:"Corn/Soy"},
+  {name:"Punjab, India",s:6.7,base:15000,cost:0.05,crop:"Rice/Wheat"},
+  {name:"Dhaka, Bangladesh",s:14.2,base:13500,cost:0.04,crop:"Rice/Jute"},
+  {name:"Shandong, China",s:23.7,base:8000,cost:0.08,crop:"Wheat/Maize"},
+  {name:"Mekong Delta, Vietnam",s:13.8,base:13000,cost:0.06,crop:"Paddy Rice"},
+  {name:"Addis Ababa, Ethiopia",s:24.1,base:6000,cost:0.10,crop:"Maize/Teff"},
+  {name:"Johannesburg, South Africa",s:27.0,base:9500,cost:0.18,crop:"Maize/Vineyard"},
+  {name:"Tuscany, Italy",s:28.9,base:8500,cost:0.30,crop:"Olive/Vine"},
+  {name:"Seville, Spain",s:16.6,base:8500,cost:0.28,crop:"Olive/Citrus"},
+  {name:"Buenos Aires, Argentina",s:27.7,base:7000,cost:0.12,crop:"Soybean"},
+  {name:"Sao Paulo, Brazil",s:19.9,base:11000,cost:0.14,crop:"Sugarcane"},
+  {name:"Canterbury Plains, NZ",s:36.3,base:7500,cost:0.20,crop:"Mixed Grain"}
+];
+var SOILS={
+  "Loam":{wp:0.12,fc:0.31,sat:0.46,ks:10.9},
+  "Clay":{wp:0.20,fc:0.42,sat:0.55,ks:1.5},
+  "Sandy":{wp:0.06,fc:0.18,sat:0.43,ks:60.0},
+  "Silty Loam":{wp:0.11,fc:0.33,sat:0.49,ks:6.8},
+  "Clay Loam":{wp:0.17,fc:0.38,sat:0.52,ks:2.3}
+};
+var CROPS={
+  "Corn":{tgt:0.30,rd:1.2,kc:1.15},
+  "Tomato":{tgt:0.28,rd:0.7,kc:1.10},
+  "Wheat":{tgt:0.26,rd:1.0,kc:1.05},
+  "Rice":{tgt:0.38,rd:0.5,kc:1.20},
+  "Almond":{tgt:0.25,rd:1.5,kc:0.90},
+  "Cotton":{tgt:0.27,rd:1.0,kc:1.05},
+  "Soybean":{tgt:0.29,rd:0.9,kc:1.10},
+  "Sugarcane":{tgt:0.32,rd:0.8,kc:1.25}
+};
+var MR=[
+  {id:1,tag:"MR1",title:"FNO Convergence",badge:"Slope -1.34, R²=0.927",
+   latex:"\\|\\mathcal{G}^\\dagger - \\mathcal{G}_N\\| \\leq N^{-s/d}",
+   note:"Sobolev s=3, d=2 gives theoretical slope −1.5. Empirical: −1.34.",
+   rows:[["Empirical slope","-1.34"],["Theoretical","-1.50"],["R-squared","0.927"],["Deviation","10.7%"]],
+   insight:"10.7% shallowing vs theory is attributable to SMAP 9km resolution. R²=0.927 confirms power-law scaling."},
+  {id:2,tag:"MR2",title:"Lipschitz Stability",badge:"L = -0.487, All stable",
+   latex:"\\|\\delta\\theta(t)\\| \\leq \\varepsilon \\cdot e^{Lt}, \\quad L < 0",
+   note:"Negative L means perturbations decay exponentially.",
+   rows:[["Lipschitz L","-0.487"],["Perturbations","±5% to ±20%"],["Steps to <2% err","3"],["Worst error","<1.8%"]],
+   insight:"All perturbation levels converged near-zero by step 3. Sensor noise absorbed without destabilizing forecast."},
+  {id:3,tag:"MR3",title:"Uncertainty Bounds",badge:"97.3% within theory",
+   latex:"\\text{Var}[\\theta(x,t)] \\leq \\sigma_{\\max}^2 \\cdot t \\cdot |\\Omega| \\cdot C",
+   note:"From Itô's lemma on the stochastic Richards equation.",
+   rows:[["Within bounds","97.3%"],["Monte Carlo N","500"],["Grid","32×32"],["Mean error","<0.001 m³/m³"]],
+   insight:"2.7% exceedances occur at sharp clay-sand boundaries. Bound holds globally for uniform soils."},
+  {id:4,tag:"MR4",title:"Fokker-Planck",badge:"KL = 0.047 < 0.10",
+   latex:"\\frac{\\partial p}{\\partial t} = -\\nabla\\cdot(f(\\theta)p) + \\frac{1}{2}\\nabla^2(\\sigma^2(\\theta)p)",
+   note:"KL < 0.10 confirms match with theoretical distribution.",
+   rows:[["KL divergence","0.047"],["Pass threshold","< 0.10"],["Distribution center","θ ≈ 0.226"],["Tail failure","< 2%"]],
+   insight:"KL=0.047 validates that the learned noise function captures full uncertainty structure across the soil domain."},
+  {id:5,tag:"MR5",title:"Lyapunov Stability",badge:"λ=0.0375/day, R²=0.97",
+   latex:"V(\\theta) = \\|\\theta - \\theta^*\\|^2, \\quad \\frac{dV}{dt} \\leq -\\lambda V + C\\sigma^2",
+   note:"V decreasing means θ converges to target.",
+   rows:[["Decay rate","0.0375/day"],["V reduction","67% over 30 days"],["R-squared","0.97"],["Starting deficit","40% below target"]],
+   insight:"67% Lyapunov reduction proves exponential convergence. Neural MPC beat threshold (−23%) and PID (−41%)."},
+  {id:6,tag:"MR6",title:"Safety Guarantee",badge:"0 violations / 1000 sims",
+   latex:"P\\bigl(\\theta(t) \\geq \\theta_{\\text{crit}}\\bigr) \\geq 1 - \\delta, \\quad \\delta = 0.05",
+   note:"θ_crit = 0.20 m³/m³. Safety requires ≥95% probability.",
+   rows:[["MPC violations","0 / 1000"],["Max allowed","50 / 1000"],["Hardware min","0.200 m³/m³"],["Wilting events","0"]],
+   insight:"Zero violations in simulation and hardware. MPC operated at, never below, the wilting constraint."},
+  {id:7,tag:"MR7",title:"Economic Optimality",badge:"-13.2% vs PID, $99M / 500K ha",
+   latex:"\\min_u \\mathbb{E}\\!\\left[\\int_0^T \\alpha u^2 + \\beta(\\theta - \\theta^*)^2\\,dt\\right]",
+   note:"α=0.5 (water cost), β=2.0 (moisture tracking). Receding-horizon MPC.",
+   rows:[["Threshold","0.409 m³/event"],["PID","0.364 m³/event"],["Neural MPC","0.355 m³/event"],["vs PID","-13.2%"]],
+   insight:"At 500K-ha: 660M m³ water saved, $99M annual savings, 244K tons CO₂ reduced. Zero crop health compromise."}
+];
+var PLANTS=[
+  {name:"Plant 1",group:"Treatment",mpc:true,tf:0.28,water:72.6,hist:[0.30,0.29,0.28,0.30,0.28,0.29,0.30,0.28,0.29,0.30,0.28,0.29,0.28,0.30]},
+  {name:"Plant 2",group:"Treatment",mpc:true,tf:0.26,water:64.8,hist:[0.28,0.27,0.26,0.28,0.27,0.28,0.26,0.27,0.28,0.27,0.26,0.28,0.27,0.26]},
+  {name:"Plant 3",group:"Control",mpc:false,tf:0.23,water:109.0,hist:[0.34,0.24,0.33,0.24,0.34,0.25,0.33,0.24,0.34,0.24,0.33,0.24,0.34,0.24]},
+  {name:"Plant 4",group:"Control",mpc:false,tf:0.24,water:112.1,hist:[0.35,0.25,0.34,0.25,0.35,0.24,0.34,0.25,0.35,0.25,0.34,0.25,0.35,0.25]}
+];
+var POSTS=[
+  {user:"Dr. A. Patel",role:"Agronomist, Punjab",ago:"2h",tag:"Research",text:"The -1.34 slope vs -1.5 theory is almost certainly SMAP 9km resolution. Have you considered fusing with Sentinel-1 SAR?",likes:24,liked:false},
+  {user:"Maria Chen",role:"Water Engineer, California",ago:"5h",tag:"Field Work",text:"Deployed threshold-based drip in Central Valley for 3 years. The 26.5% savings estimate matches our benchmarks exactly.",likes:41,liked:false},
+  {user:"James Okoye",role:"Smallholder, Kenya",ago:"1d",tag:"Smallholders",text:"$60 hardware is the real breakthrough. Does this work with bucket-gravity drip? Most East Africa farms have no electricity.",likes:67,liked:false},
+  {user:"Prof. Y. Nakamura",role:"ML Researcher, Tokyo",ago:"2d",tag:"Research",text:"KL=0.047 on Fokker-Planck validation is tight. Did you use fixed diffusion sigma or learn it spatially from SMAP?",likes:18,liked:false}
+];
+
+function calcETo(T,u,rh){
+  var es=0.6108*Math.exp(17.27*T/(T+237.3));
+  var ea=es*(rh/100);
+  var vpd=Math.max(0,es-ea);
+  return Math.max(0.5,0.408*(0.2*T+2)+0.66*(vpd/(1+0.34*u*0.278)));
+}
+function runMPC(th0,sk,ck,eto,rain){
+  var s=SOILS[sk]||SOILS["Loam"],c=CROPS[ck]||CROPS["Corn"];
+  var th=th0,out=[];
+  for(var d=0;d<=7;d++){
+    out.push(parseFloat(th.toFixed(4)));
+    var drain=Math.max(0,(th-s.fc)*(s.ks/1000)*24);
+    var ro=Math.max(0,th+rain/1000-s.sat);
+    var rn=Math.max(0,rain/1000-ro);
+    var thn=th-eto*c.kc/1000-drain+rn;
+    var irr=thn<c.tgt-0.02?Math.min(c.tgt-thn,s.sat-th)*0.9:0;
+    var noise=(Math.random()-0.5)*0.003*Math.exp(-0.487*d);
+    th=Math.max(s.wp+0.01,Math.min(s.sat-0.02,thn+irr+noise));
+  }
+  return out;
+}
+function runThr(th0,sk,ck,eto,rain){
+  var s=SOILS[sk]||SOILS["Loam"],c=CROPS[ck]||CROPS["Corn"];
+  var th=th0,out=[];
+  for(var d=0;d<=7;d++){
+    out.push(parseFloat(th.toFixed(4)));
+    var rn=Math.max(0,rain/1000-Math.max(0,th+rain/1000-s.sat));
+    var irr=th<0.25?0.07:0;
+    th=Math.max(s.wp,Math.min(s.sat-0.01,th-eto*c.kc/1000+rn+irr));
+  }
+  return out;
+}
+function getBands(mpc){
+  return mpc.map(function(v,d){
+    var h=Math.min(0.05,1.645*Math.sqrt(9e-6*(d+1)*1024));
+    return{lo:Math.max(0.14,v-h),hi:Math.min(0.44,v+h)};
+  });
+}
+
+// ── SMALL COMPONENTS ──────────────────────────────────────────────────────────
+function KatexMath(props){
+  var ref=useRef(null);
+  useEffect(function(){
+    if(ref.current&&window.katex){
+      try{window.katex.render(props.latex,ref.current,{throwOnError:false,displayMode:true});}
+      catch(e){ref.current.textContent=props.latex;}
+    }
+  },[props.latex]);
+  return <div ref={ref} style={{overflowX:"auto",padding:"6px 0",fontSize:"15px"}}/>;
+}
+
+function ForecastCanvas(props){
+  var ref=useRef(null);
+  useEffect(function(){
+    var c=ref.current;
+    if(!c||!props.mpc||!props.mpc.length)return;
+    var dpr=window.devicePixelRatio||1;
+    var W=c.offsetWidth||600,H=200;
+    c.width=W*dpr;c.height=H*dpr;c.style.width=W+"px";c.style.height=H+"px";
+    var ctx=c.getContext("2d");ctx.scale(dpr,dpr);
+    var pad={l:44,r:12,t:16,b:32};
+    var cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+    var yMin=0.10,yMax=0.46;
+    function tx(d){return pad.l+cw*(d/(props.mpc.length-1));}
+    function ty(v){return H-pad.b-ch*((v-yMin)/(yMax-yMin));}
+    ctx.fillStyle="#fafafa";ctx.fillRect(0,0,W,H);
+    var soil=SOILS[props.sk]||SOILS["Loam"];
+    var crop=CROPS[props.ck]||CROPS["Corn"];
+    [0.15,0.20,0.25,0.30,0.35,0.40].forEach(function(v){
+      ctx.strokeStyle="#e5e7eb";ctx.lineWidth=0.8;ctx.setLineDash([]);
+      ctx.beginPath();ctx.moveTo(pad.l,ty(v));ctx.lineTo(W-pad.r,ty(v));ctx.stroke();
+      ctx.fillStyle="#9ca3af";ctx.font="9px Inter,sans-serif";ctx.textAlign="right";
+      ctx.fillText(v.toFixed(2),pad.l-4,ty(v)+3);
+    });
+    for(var d=0;d<props.mpc.length;d++){
+      ctx.fillStyle="#9ca3af";ctx.font="9px Inter,sans-serif";ctx.textAlign="center";
+      ctx.fillText("D"+d,tx(d),H-pad.b+14);
+    }
+    ctx.strokeStyle="#86efac";ctx.lineWidth=1;ctx.setLineDash([3,3]);
+    ctx.beginPath();ctx.moveTo(pad.l,ty(crop.tgt));ctx.lineTo(W-pad.r,ty(crop.tgt));ctx.stroke();
+    ctx.strokeStyle="#fca5a5";ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,ty(soil.wp));ctx.lineTo(W-pad.r,ty(soil.wp));ctx.stroke();
+    ctx.setLineDash([]);
+    if(props.bands&&props.bands.length){
+      ctx.fillStyle="rgba(16,185,129,0.10)";
+      ctx.beginPath();
+      props.bands.forEach(function(b,i){if(i===0)ctx.moveTo(tx(i),ty(b.hi));else ctx.lineTo(tx(i),ty(b.hi));});
+      for(var i=props.bands.length-1;i>=0;i--)ctx.lineTo(tx(i),ty(props.bands[i].lo));
+      ctx.closePath();ctx.fill();
+    }
+    if(props.thr&&props.thr.length){
+      ctx.strokeStyle="#f87171";ctx.lineWidth=1.5;ctx.setLineDash([5,3]);
+      ctx.beginPath();
+      props.thr.forEach(function(v,i){if(i===0)ctx.moveTo(tx(i),ty(v));else ctx.lineTo(tx(i),ty(v));});
+      ctx.stroke();ctx.setLineDash([]);
+    }
+    ctx.strokeStyle=GREEN;ctx.lineWidth=2.5;
+    ctx.beginPath();
+    props.mpc.forEach(function(v,i){if(i===0)ctx.moveTo(tx(i),ty(v));else ctx.lineTo(tx(i),ty(v));});
+    ctx.stroke();
+    props.mpc.forEach(function(v,i){
+      ctx.beginPath();ctx.arc(tx(i),ty(v),3.5,0,Math.PI*2);
+      ctx.fillStyle=GREEN;ctx.fill();
+      ctx.strokeStyle="#fff";ctx.lineWidth=1.5;ctx.stroke();
+    });
+  },[props.mpc,props.thr,props.bands,props.sk,props.ck]);
+  return <canvas ref={ref} style={{width:"100%",display:"block",borderRadius:"8px"}}/>;
+}
+
+function MiniGraph(props){
+  var ref=useRef(null);
+  useEffect(function(){
+    var c=ref.current;
+    if(!c||!props.data||!props.data.length)return;
+    var dpr=window.devicePixelRatio||1,W=c.offsetWidth||120,H=props.h||32;
+    c.width=W*dpr;c.height=H*dpr;c.style.width=W+"px";c.style.height=H+"px";
+    var ctx=c.getContext("2d");ctx.scale(dpr,dpr);
+    var mn=Math.min.apply(null,props.data)-0.005;
+    var mx=Math.max.apply(null,props.data)+0.005;
+    function tx(i){return(i/(props.data.length-1))*W;}
+    function ty(v){return H-((v-mn)/(mx-mn))*(H-4)-2;}
+    ctx.strokeStyle=props.color||GREEN;ctx.lineWidth=1.8;
+    ctx.beginPath();
+    props.data.forEach(function(v,i){if(i===0)ctx.moveTo(tx(i),ty(v));else ctx.lineTo(tx(i),ty(v));});
+    ctx.stroke();
+  },[props.data,props.color,props.h]);
+  return <canvas ref={ref} style={{width:"100%",height:props.h||32,display:"block"}}/>;
+}
+
+function Tag(props){
+  return <span style={{display:"inline-block",padding:"2px 10px",borderRadius:"999px",fontSize:"11px",fontWeight:"600",background:props.green?"#d1fae5":"#f3f4f6",color:props.green?"#065f46":"#374151"}}>{props.children}</span>;
+}
+function Stat(props){
+  return(
+    <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"12px",padding:"16px",textAlign:"center"}}>
+      <div style={{fontSize:"22px",fontWeight:"700",color:GREEN,fontFamily:"'Playfair Display',serif",letterSpacing:"-0.5px"}}>{props.val}</div>
+      <div style={{fontSize:"12px",fontWeight:"600",color:"#374151",marginTop:"4px"}}>{props.label}</div>
+      {props.sub&&<div style={{fontSize:"11px",color:GRAY,marginTop:"2px"}}>{props.sub}</div>}
+    </div>
+  );
+}
+function Card(props){
+  return(
+    <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"12px",padding:"20px",marginBottom:"0"}}>
+      {props.title&&<div style={{fontSize:"14px",fontWeight:"600",color:"#111827",marginBottom:"14px",paddingBottom:"10px",borderBottom:"1px solid #f3f4f6"}}>{props.title}</div>}
+      {props.children}
+    </div>
+  );
+}
+function SliderRow(props){
+  return(
+    <div style={{marginBottom:"14px"}}>
+      <div style={{display:"flex",justifyContent:"space-between",marginBottom:"5px"}}>
+        <span style={{fontSize:"13px",color:"#374151"}}>{props.label}</span>
+        <span style={{fontSize:"13px",fontWeight:"700",color:TEAL,fontFamily:"monospace"}}>{props.display}</span>
+      </div>
+      <input type="range" min={props.min} max={props.max} step={props.step} value={props.value}
+        onChange={function(e){props.onChange(Number(e.target.value));}}/>
+    </div>
+  );
+}
+function SelectRow(props){
+  var s={width:"100%",padding:"8px 10px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",background:"#fafafa",color:"#111827",outline:"none"};
+  return(
+    <div style={{marginBottom:"12px"}}>
+      <div style={{fontSize:"11px",fontWeight:"600",color:GRAY,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"5px"}}>{props.label}</div>
+      <select style={s} value={props.value} onChange={function(e){props.onChange(e.target.value);}}>
+        {props.options.map(function(o){return <option key={o}>{o}</option>;})}
+      </select>
+    </div>
+  );
+}
+
+// ── LANGUAGE SWITCHER ─────────────────────────────────────────────────────────
+function LangSwitcher(props) {
+  var _open = useState(false); var open = _open[0]; var setOpen = _open[1];
+  var ref = useRef(null);
+  var cur = LANGS[props.lang] || LANGS["en"];
+
+  useEffect(function() {
+    function handler(e) {
+      if (ref.current && !ref.current.contains(e.target)) setOpen(false);
+    }
+    document.addEventListener("mousedown", handler);
+    return function() { document.removeEventListener("mousedown", handler); };
+  }, []);
+
+  return (
+    <div ref={ref} style={{position:"relative",display:"inline-block"}}>
+      <button onClick={function(){setOpen(!open);}}
+        style={{display:"flex",alignItems:"center",gap:"5px",background:props.solid?"#f0fdf4":"rgba(255,255,255,0.15)",
+          border:props.solid?"1px solid "+BORDER:"1px solid rgba(255,255,255,0.25)",
+          borderRadius:"8px",padding:"6px 12px",fontSize:"13px",fontWeight:"600",
+          color:props.solid?GREEN:"#fff",cursor:"pointer",fontFamily:"inherit"}}>
+        <span style={{fontSize:"15px"}}>{cur.flag}</span>
+        <span>{cur.label}</span>
+        <span style={{fontSize:"9px",opacity:"0.7"}}>{open?"▲":"▼"}</span>
+      </button>
+      {open&&(
+        <div style={{position:"absolute",top:"calc(100% + 6px)",right:"0",background:"#fff",border:"1px solid #e5e7eb",
+          borderRadius:"10px",boxShadow:"0 8px 24px rgba(0,0,0,0.12)",minWidth:"160px",zIndex:"9999",overflow:"hidden"}}>
+          {Object.keys(LANGS).map(function(lk){
+            var l = LANGS[lk];
+            return(
+              <div key={lk} onClick={function(){props.onChange(lk);setOpen(false);}}
+                style={{padding:"9px 14px",fontSize:"13px",cursor:"pointer",display:"flex",alignItems:"center",
+                  gap:"8px",color:lk===props.lang?GREEN:"#374151",background:lk===props.lang?"#f0fdf4":"#fff",
+                  fontWeight:lk===props.lang?"700":"400",fontFamily:"inherit"}}>
+                <span style={{fontSize:"16px"}}>{l.flag}</span>
+                <span>{l.label}</span>
+                {lk===props.lang&&<span style={{marginLeft:"auto",fontSize:"11px",color:GREEN}}>✓</span>}
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── MODAL AUTH ────────────────────────────────────────────────────────────────
+function ModalAuth(props){
+  var t = props.t;
+  var _s=useState("signin");var mode=_s[0];var setMode=_s[1];
+  var _e=useState("");var email=_e[0];var setEmail=_e[1];
+  var _p=useState("");var pass=_p[0];var setPass=_p[1];
+  var _n=useState("");var name=_n[0];var setName=_n[1];
+  var _err=useState("");var err=_err[0];var setErr=_err[1];
+  function submit(){
+    if(!email.trim()){setErr("Email required.");return;}
+    if(pass.length<6){setErr("Password must be 6+ chars.");return;}
+    if(mode==="signup"&&!name.trim()){setErr("Name required.");return;}
+    props.onAuth();
+  }
+  var iStyle={width:"100%",padding:"10px 12px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",outline:"none",fontFamily:"inherit"};
+  return(
+    <div style={{position:"fixed",inset:"0",zIndex:"2000",display:"flex",alignItems:"center",justifyContent:"center",background:"rgba(0,0,0,0.5)"}}
+      onClick={function(e){if(e.target===e.currentTarget)props.onClose();}}>
+      <div style={{background:"#fff",borderRadius:"20px",padding:"36px 32px",width:"100%",maxWidth:"380px",margin:"0 16px",boxShadow:"0 20px 60px rgba(0,0,0,0.2)"}}>
+        <div style={{textAlign:"center",marginBottom:"24px"}}>
+          <div style={{width:"40px",height:"40px",background:"linear-gradient(135deg,"+TEAL+","+GREEN+")",borderRadius:"10px",margin:"0 auto 10px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M12 2C12 2 4 10 4 15a8 8 0 0 0 16 0C20 10 12 2 12 2z"/></svg>
+          </div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:"700",color:"#111"}}>{t.brand}</div>
+        </div>
+        <div style={{display:"flex",background:"#f3f4f6",borderRadius:"10px",padding:"3px",marginBottom:"18px"}}>
+          {["signin","signup"].map(function(m){
+            return(
+              <button key={m} onClick={function(){setMode(m);setErr("");}}
+                style={{flex:"1",padding:"7px",border:"none",borderRadius:"7px",fontSize:"13px",fontWeight:"600",
+                  background:mode===m?"#fff":"transparent",color:mode===m?GREEN:GRAY,
+                  boxShadow:mode===m?"0 1px 3px rgba(0,0,0,0.1)":"none"}}>
+                {m==="signin"?t.signin:"Sign Up"}
+              </button>
+            );
+          })}
+        </div>
+        {err&&<div style={{background:"#fef2f2",border:"1px solid #fecaca",borderRadius:"8px",padding:"8px 12px",fontSize:"12px",color:"#dc2626",marginBottom:"12px"}}>{err}</div>}
+        <div style={{display:"flex",flexDirection:"column",gap:"10px"}}>
+          {mode==="signup"&&<input placeholder="Full name" value={name} onChange={function(e){setName(e.target.value);}} style={iStyle}/>}
+          <input type="email" placeholder="Email" value={email} onChange={function(e){setEmail(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")submit();}} style={iStyle}/>
+          <input type="password" placeholder="Password (6+ chars)" value={pass} onChange={function(e){setPass(e.target.value);}} onKeyDown={function(e){if(e.key==="Enter")submit();}} style={iStyle}/>
+          <button onClick={submit} style={{background:GREEN,color:"#fff",border:"none",borderRadius:"10px",padding:"12px",fontWeight:"700",fontSize:"14px",marginTop:"4px"}}>
+            {mode==="signin"?t.signin:"Create Account"}
+          </button>
+        </div>
+        <div style={{textAlign:"center",marginTop:"12px",fontSize:"11px",color:"#9ca3af"}}>Any email + 6-char password</div>
+      </div>
+    </div>
+  );
+}
+
+// ── NAV BAR ───────────────────────────────────────────────────────────────────
+function NavBar(props){
+  var t = props.t;
+  var solid=props.scrolled||props.page!=="home";
+  var PAGES=[
+    {id:"analysis",label:t.nav_analysis},
+    {id:"research",label:t.nav_research},
+    {id:"community",label:t.nav_community},
+    {id:"learn",label:t.nav_learn},
+    {id:"about",label:t.nav_about},
+    {id:"impact",label:t.nav_impact},
+    {id:"howto",label:t.nav_howto},
+  ];
+  return(
+    <nav style={{position:"fixed",top:"0",left:"0",right:"0",zIndex:"1000",height:"64px",display:"flex",alignItems:"center",
+      background:solid?"rgba(255,255,255,0.96)":"transparent",
+      backdropFilter:solid?"blur(12px)":"none",
+      boxShadow:solid?"0 1px 16px rgba(0,0,0,0.07)":"none",
+      transition:"background 0.3s,box-shadow 0.3s",padding:"0 24px",gap:"4px"}}>
+      <div style={{display:"flex",alignItems:"center",gap:"8px",cursor:"pointer",marginRight:"8px"}} onClick={function(){props.go("home");}}>
+        <div style={{width:"32px",height:"32px",background:"linear-gradient(135deg,"+TEAL+","+GREEN+")",borderRadius:"8px",display:"flex",alignItems:"center",justifyContent:"center"}}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 2C12 2 4 10 4 15a8 8 0 0 0 16 0C20 10 12 2 12 2z"/></svg>
+        </div>
+        <span style={{fontFamily:"'Playfair Display',serif",fontWeight:"700",fontSize:"18px",color:solid?DARK:"#fff"}}>{t.brand}</span>
+      </div>
+      <div style={{flex:"1"}}/>
+      {PAGES.map(function(p){
+        var isHowTo = p.id==="howto";
+        return(
+          <button key={p.id} onClick={function(){props.go(p.id);}}
+            style={{background:isHowTo?(props.page===p.id?GREEN:"transparent"):"none",
+              border: isHowTo ? "none" : "none",
+              fontSize:"12px",fontWeight:"600",padding:"5px 9px",borderRadius:"6px",
+              color:props.page===p.id?(isHowTo?"#fff":GREEN):solid?"#374151":"rgba(255,255,255,0.85)",
+              textTransform:"capitalize",whiteSpace:"nowrap"}}>
+            {p.label}
+          </button>
+        );
+      })}
+      <LangSwitcher lang={props.lang} onChange={props.setLang} solid={solid}/>
+      {props.authed
+        ?<button onClick={props.signOut} style={{marginLeft:"8px",background:"#ecfdf5",color:GREEN,border:"1px solid "+BORDER,borderRadius:"8px",padding:"7px 14px",fontWeight:"700",fontSize:"13px"}}>{t.signout}</button>
+        :<button onClick={props.showAuth} style={{marginLeft:"8px",background:GREEN,color:"#fff",border:"none",borderRadius:"8px",padding:"8px 16px",fontWeight:"700",fontSize:"13px",boxShadow:"0 2px 10px rgba(5,150,105,0.3)"}}>{t.signin}</button>
+      }
+    </nav>
+  );
+}
+
+// ── HOW-TO PAGE ───────────────────────────────────────────────────────────────
+function HowToPage(props) {
+  var t = props.t;
+  var _openFaq = useState(null); var openFaq = _openFaq[0]; var setOpenFaq = _openFaq[1];
+
+  var STEPS = [
+    {num:"01", icon:"M16 7a4 4 0 1 1-8 0 4 4 0 0 1 8 0zM12 14a7 7 0 0 0-7 7h14a7 7 0 0 0-7-7z",
+     title: t.howto_step1_title, desc: t.howto_step1_desc, tip: t.howto_step1_tip, color:"#6366f1"},
+    {num:"02", icon:"M17.657 16.657L13.414 20.9a1.998 1.998 0 0 1-2.827 0l-4.244-4.243a8 8 0 1 1 11.314 0z M15 11a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+     title: t.howto_step2_title, desc: t.howto_step2_desc, tip: t.howto_step2_tip, color:TEAL},
+    {num:"03", icon:"M3 15a4 4 0 0 0 4 4h9a5 5 0 1 0-4.9-6H7a4 4 0 0 0-4 4v0z M3 15a4 4 0 0 0 4 4",
+     title: t.howto_step3_title, desc: t.howto_step3_desc, tip: t.howto_step3_tip, color:"#0891b2"},
+    {num:"04", icon:"M9 19v-6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2zm0 0V9a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v10m-6 0a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2m0 0V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2z",
+     title: t.howto_step4_title, desc: t.howto_step4_desc, tip: t.howto_step4_tip, color:GREEN},
+    {num:"05", icon:"M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2z",
+     title: t.howto_step5_title, desc: t.howto_step5_desc, tip: t.howto_step5_tip, color:"#f59e0b"},
+    {num:"06", icon:"M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z",
+     title: t.howto_step6_title, desc: t.howto_step6_desc, tip: t.howto_step6_tip, color:"#10b981"},
+  ];
+
+  var FAQS = [
+    {q: t.howto_faq1q, a: t.howto_faq1a},
+    {q: t.howto_faq2q, a: t.howto_faq2a},
+    {q: t.howto_faq3q, a: t.howto_faq3a},
+    {q: t.howto_faq4q, a: t.howto_faq4a},
+    {q: t.howto_faq5q, a: t.howto_faq5a},
+  ];
+
+  var HARDWARE = [
+    {step:"1", title: t.howto_h1, desc: t.howto_h1d, icon:"🛒"},
+    {step:"2", title: t.howto_h2, desc: t.howto_h2d, icon:"🔌"},
+    {step:"3", title: t.howto_h3, desc: t.howto_h3d, icon:"☀️"},
+    {step:"4", title: t.howto_h4, desc: t.howto_h4d, icon:"📱"},
+  ];
+
+  return (
+    <div>
+      {/* Hero */}
+      <div style={{background:"linear-gradient(135deg,#064e3b,#0d9488 60%,#059669)",paddingTop:"64px"}}>
+        <div style={{maxWidth:"960px",margin:"0 auto",padding:"48px 32px 0"}}>
+          <div style={{display:"inline-flex",alignItems:"center",gap:"6px",background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.25)",borderRadius:"999px",padding:"4px 14px",fontSize:"11px",fontWeight:"700",letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(255,255,255,0.9)",marginBottom:"16px"}}>
+            📋 {t.howto_label}
+          </div>
+          <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(28px,4vw,48px)",fontWeight:"700",color:"#fff",lineHeight:"1.1",marginBottom:"12px"}}>
+            {t.howto_title}
+          </h1>
+          <p style={{fontSize:"16px",color:"rgba(255,255,255,0.75)",lineHeight:"1.6",maxWidth:"520px",marginBottom:"0"}}>
+            {t.howto_sub}
+          </p>
+          <div style={{height:"32px"}}/>
+        </div>
+        <svg viewBox="0 0 1440 40" style={{display:"block",width:"100%"}} xmlns="http://www.w3.org/2000/svg">
+          <path d="M0,20 C360,40 1080,0 1440,20 L1440,40 L0,40 Z" fill="#f9fafb"/>
+        </svg>
+      </div>
+
+      <div style={{maxWidth:"960px",margin:"0 auto",padding:"40px 32px 80px"}}>
+
+        {/* Progress hint */}
+        <div style={{display:"flex",alignItems:"center",gap:"8px",background:"#fffbeb",border:"1px solid #fde68a",borderRadius:"10px",padding:"12px 16px",marginBottom:"36px"}}>
+          <span style={{fontSize:"18px"}}>💡</span>
+          <span style={{fontSize:"13px",color:"#92400e",fontWeight:"500"}}>
+            {t.howto_sub}
+          </span>
+        </div>
+
+        {/* Step-by-step */}
+        <div style={{marginBottom:"48px"}}>
+          {STEPS.map(function(step, i) {
+            return (
+              <div key={i} className="step-card" style={{display:"flex",gap:"20px",marginBottom:"20px",background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"24px",alignItems:"flex-start",borderLeft:"4px solid "+step.color}}>
+                {/* Number */}
+                <div style={{flexShrink:0,width:"52px",height:"52px",borderRadius:"14px",background:step.color+"18",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:"0"}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:"700",color:step.color,lineHeight:"1"}}>{step.num}</div>
+                </div>
+                {/* Content */}
+                <div style={{flex:"1"}}>
+                  <div style={{fontSize:"17px",fontWeight:"700",color:"#111827",marginBottom:"8px"}}>{step.title}</div>
+                  <div style={{fontSize:"14px",color:"#374151",lineHeight:"1.75",marginBottom:"10px"}}>{step.desc}</div>
+                  <div style={{display:"flex",alignItems:"flex-start",gap:"7px",background:"#f0fdf4",border:"1px solid #a7f3d0",borderRadius:"8px",padding:"9px 12px"}}>
+                    <span style={{fontSize:"14px",flexShrink:0,marginTop:"1px"}}>✅</span>
+                    <span style={{fontSize:"13px",color:"#065f46",fontWeight:"500"}}>{step.tip}</span>
+                  </div>
+                </div>
+                {/* Arrow if not last */}
+                {i < STEPS.length-1 && (
+                  <div style={{position:"absolute",left:"63px",marginTop:"76px",fontSize:"20px",color:step.color,opacity:"0.4",display:"none"}}/>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Quick Reference card */}
+        <div style={{background:"linear-gradient(135deg,#064e3b,#0d9488)",borderRadius:"16px",padding:"28px",marginBottom:"36px"}}>
+          <div style={{fontSize:"16px",fontWeight:"700",color:"#fff",marginBottom:"16px"}}>📊 {t.howto_q_title}</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}}>
+            {[
+              {text: t.howto_q_optimal, dot:"#22c55e", bg:"rgba(34,197,94,0.15)"},
+              {text: t.howto_q_adequate, dot:TEAL, bg:"rgba(13,148,136,0.15)"},
+              {text: t.howto_q_deficit, dot:"#f97316", bg:"rgba(249,115,22,0.15)"},
+              {text: t.howto_q_wilting, dot:"#ef4444", bg:"rgba(239,68,68,0.15)"},
+            ].map(function(item,i){
+              return(
+                <div key={i} style={{background:item.bg,border:"1px solid rgba(255,255,255,0.1)",borderRadius:"10px",padding:"12px",display:"flex",gap:"10px",alignItems:"flex-start"}}>
+                  <div style={{width:"10px",height:"10px",borderRadius:"50%",background:item.dot,flexShrink:0,marginTop:"4px"}}/>
+                  <span style={{fontSize:"13px",color:"rgba(255,255,255,0.9)",lineHeight:"1.5"}}>{item.text}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Hardware section */}
+        <div style={{marginBottom:"36px"}}>
+          <div style={{fontSize:"20px",fontWeight:"700",color:"#111827",marginBottom:"6px"}}>🔧 {t.howto_hardware_title}</div>
+          <div style={{fontSize:"14px",color:GRAY,marginBottom:"20px"}}>{t.howto_hardware_sub}</div>
+          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+            {HARDWARE.map(function(hw,i){
+              return(
+                <div key={i} style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"12px",padding:"18px"}}>
+                  <div style={{display:"flex",alignItems:"center",gap:"10px",marginBottom:"8px"}}>
+                    <span style={{fontSize:"22px"}}>{hw.icon}</span>
+                    <div>
+                      <div style={{fontSize:"10px",fontWeight:"700",color:GREEN,textTransform:"uppercase",letterSpacing:"1px"}}>Step {hw.step}</div>
+                      <div style={{fontSize:"14px",fontWeight:"700",color:"#111827"}}>{hw.title}</div>
+                    </div>
+                  </div>
+                  <div style={{fontSize:"13px",color:GRAY,lineHeight:"1.65"}}>{hw.desc}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* FAQ */}
+        <div style={{marginBottom:"36px"}}>
+          <div style={{fontSize:"20px",fontWeight:"700",color:"#111827",marginBottom:"16px"}}>❓ {t.howto_faq_title}</div>
+          {FAQS.map(function(faq,i){
+            var isOpen = openFaq === i;
+            return(
+              <div key={i} style={{background:"#fff",border:"1px solid "+(isOpen?BORDER:"#e5e7eb"),borderRadius:"10px",marginBottom:"8px",overflow:"hidden"}}>
+                <button onClick={function(){setOpenFaq(isOpen?null:i);}}
+                  style={{width:"100%",padding:"14px 18px",background:"none",border:"none",display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",fontFamily:"inherit"}}>
+                  <span style={{fontSize:"14px",fontWeight:"600",color:"#111827",textAlign:"left"}}>{faq.q}</span>
+                  <span style={{fontSize:"18px",color:GREEN,flexShrink:0,marginLeft:"12px"}}>{isOpen?"−":"+"}</span>
+                </button>
+                {isOpen&&(
+                  <div style={{padding:"0 18px 14px",fontSize:"14px",color:GRAY,lineHeight:"1.7",borderTop:"1px solid #f3f4f6"}}>{faq.a}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* CTA */}
+        <div style={{textAlign:"center",background:"#ecfdf5",border:"1px solid "+BORDER,borderRadius:"16px",padding:"32px"}}>
+          <div style={{fontSize:"20px",fontWeight:"700",color:"#111827",marginBottom:"8px"}}>Ready to start? 💧</div>
+          <div style={{fontSize:"14px",color:GRAY,marginBottom:"20px"}}>{t.howto_sub}</div>
+          <button onClick={function(){props.onAnalyze&&props.onAnalyze();}}
+            style={{background:GREEN,color:"#fff",border:"none",borderRadius:"12px",padding:"14px 36px",fontWeight:"700",fontSize:"16px",boxShadow:"0 4px 16px rgba(5,150,105,0.3)"}}>
+            {t.getstarted}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── INNER HERO ────────────────────────────────────────────────────────────────
+function InnerHero(props){
+  return(
+    <div style={{background:"linear-gradient(135deg,#064e3b,#0d9488 60%,#059669)",paddingTop:"64px"}}>
+      <div style={{maxWidth:"1060px",margin:"0 auto",padding:"36px 40px 0"}}>
+        <div style={{fontSize:"11px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:"rgba(255,255,255,0.55)",marginBottom:"6px"}}>{props.label}</div>
+        <div style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(20px,3.5vw,36px)",fontWeight:"700",color:"#fff",lineHeight:"1.1",marginBottom:"8px",maxWidth:"640px"}}>{props.title}</div>
+        {props.sub&&<p style={{fontSize:"13px",color:"rgba(255,255,255,0.68)",lineHeight:"1.6",maxWidth:"540px",marginBottom:"0"}}>{props.sub}</p>}
+        {props.tabs&&(
+          <div style={{display:"flex",marginTop:"20px",borderBottom:"1px solid rgba(255,255,255,0.18)"}}>
+            {props.tabs.map(function(tab){
+              return(
+                <button key={tab.id} onClick={function(){props.onTab(tab.id);}}
+                  style={{background:"none",border:"none",fontSize:"13px",fontWeight:"600",padding:"8px 18px",marginBottom:"-1px",
+                    color:props.activeTab===tab.id?"#fff":"rgba(255,255,255,0.5)",
+                    borderBottom:props.activeTab===tab.id?"2px solid #fff":"2px solid transparent",fontFamily:"inherit"}}>
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        )}
+        <div style={{height:"28px"}}/>
+      </div>
+    </div>
+  );
+}
+
+// ── ANALYSIS PAGE (unchanged logic, translated labels) ─────────────────────
+function AnalysisPage(props){
+  var t = props.t;
+  var _step=useState(1);var step=_step[0];var setStep=_step[1];
+  var _reg=useState("Fresno, California");var reg=_reg[0];var setReg=_reg[1];
+  var _sk=useState("Loam");var sk=_sk[0];var setSk=_sk[1];
+  var _ck=useState("Corn");var ck=_ck[0];var setCk=_ck[1];
+  var _temp=useState(22);var temp=_temp[0];var setTemp=_temp[1];
+  var _rain=useState(70);var rain=_rain[0];var setRain=_rain[1];
+  var _wind=useState(12);var wind=_wind[0];var setWind=_wind[1];
+  var _rh=useState(65);var rh=_rh[0];var setRh=_rh[1];
+  var _th=useState(0.22);var th=_th[0];var setTh=_th[1];
+  var _ha=useState(10);var ha=_ha[0];var setHa=_ha[1];
+  var _mpc=useState([]);var mpc=_mpc[0];var setMpc=_mpc[1];
+  var _thr=useState([]);var thr=_thr[0];var setThr=_thr[1];
+  var _bands=useState([]);var bands=_bands[0];var setBands=_bands[1];
+  var _loading=useState(false);var loading=_loading[0];var setLoading=_loading[1];
+
+  var rd=SITES.find(function(s){return s.name===reg;})||SITES[0];
+  var soil=SOILS[sk]||SOILS["Loam"];
+  var crop=CROPS[ck]||CROPS["Corn"];
+  var eto=calcETo(temp,wind,rh);
+  var deficit=Math.max(0,crop.tgt-th);
+  var savPct=Math.max(5,Math.min(40,rd.s+(rain-80)/70-(temp-25)/12));
+  var wSaved=Math.round(ha*rd.base*savPct/100);
+  var cSaved=Math.round(wSaved*rd.cost);
+  var irrStatus=th<soil.wp+0.02?"Critical — near wilting":th<crop.tgt-0.04?"Deficit — irrigate soon":th<crop.tgt?"Adequate":"Optimal";
+  var irrColor=th<soil.wp+0.02?"#dc2626":th<crop.tgt-0.04?"#f97316":th<crop.tgt?"#0d9488":GREEN;
+
+  function runForecast(){
+    setLoading(true);
+    setTimeout(function(){
+      var e=calcETo(temp,wind,rh);
+      var m=runMPC(th,sk,ck,e,rain);
+      var tr=runThr(th,sk,ck,e,rain);
+      setMpc(m);setThr(tr);setBands(getBands(m));
+      setLoading(false);setStep(3);
+    },900);
+  }
+
+  var inpStyle={width:"100%",padding:"10px 12px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",background:"#fff",color:"#111827",outline:"none"};
+  var STEPS=["Location & Crop","Conditions","Forecast","Impact"];
+
+  return(
+    <div>
+      <InnerHero label={t.nav_analysis} title="Analyze Your Farm" sub="Step-by-step 7-day Neural MPC forecast with 90% confidence intervals."/>
+      <div style={{maxWidth:"860px",margin:"0 auto",padding:"32px 40px 72px"}}>
+        <div style={{display:"flex",alignItems:"center",marginBottom:"32px"}}>
+          {STEPS.map(function(s,i){
+            var active=step===i+1,done=step>i+1;
+            return(
+              <React.Fragment key={s}>
+                <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"5px"}}>
+                  <div style={{width:"32px",height:"32px",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",
+                    background:done?GREEN:active?"#064e3b":"#e5e7eb",
+                    color:done||active?"#fff":"#9ca3af",fontWeight:"700",fontSize:"13px",cursor:done?"pointer":"default"}}
+                    onClick={function(){if(done)setStep(i+1);}}>
+                    {done?"✓":i+1}
+                  </div>
+                  <div style={{fontSize:"11px",fontWeight:"600",color:active?"#064e3b":done?GREEN:"#9ca3af",whiteSpace:"nowrap"}}>{s}</div>
+                </div>
+                {i<STEPS.length-1&&<div style={{flex:"1",height:"2px",background:done?GREEN:"#e5e7eb",margin:"0 6px",marginBottom:"18px"}}/>}
+              </React.Fragment>
+            );
+          })}
+        </div>
+
+        {step===1&&(
+          <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"28px"}}>
+            <div style={{fontSize:"17px",fontWeight:"700",color:"#111827",marginBottom:"20px"}}>Where is your farm, and what are you growing?</div>
+            <SelectRow label="Region" value={reg} onChange={setReg} options={SITES.map(function(s){return s.name;})}/>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}}>
+              <SelectRow label="Soil Type" value={sk} onChange={setSk} options={Object.keys(SOILS)}/>
+              <SelectRow label="Crop" value={ck} onChange={setCk} options={Object.keys(CROPS)}/>
+            </div>
+            <div style={{background:"#f0fdf4",border:"1px solid #a7f3d0",borderRadius:"12px",padding:"16px",marginBottom:"20px"}}>
+              <div style={{fontSize:"12px",fontWeight:"700",color:"#065f46",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"10px"}}>Soil & Crop Profile</div>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:"8px"}}>
+                {[["Wilting pt",soil.wp.toFixed(2)+" m³/m³"],["Field cap",soil.fc.toFixed(2)+" m³/m³"],["Saturation",soil.sat.toFixed(2)+" m³/m³"],["Crop target",crop.tgt.toFixed(2)+" m³/m³"],["Root depth",crop.rd.toFixed(1)+" m"]].map(function(item){
+                  return(<div key={item[0]} style={{background:"#fff",borderRadius:"8px",padding:"10px",textAlign:"center"}}>
+                    <div style={{fontSize:"9px",color:GRAY,textTransform:"uppercase",letterSpacing:"0.3px",marginBottom:"4px"}}>{item[0]}</div>
+                    <div style={{fontSize:"13px",fontWeight:"700",color:GREEN,fontFamily:"monospace"}}>{item[1]}</div>
+                  </div>);
+                })}
+              </div>
+            </div>
+            <div style={{marginBottom:"20px"}}>
+              <div style={{fontSize:"11px",fontWeight:"600",color:GRAY,textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"6px"}}>Farm Size (hectares)</div>
+              <input type="number" value={ha} min="0.1" max="500000" onChange={function(e){setHa(Math.max(0.1,Number(e.target.value)));}} style={inpStyle}/>
+            </div>
+            <button onClick={function(){setStep(2);}} style={{width:"100%",padding:"14px",background:GREEN,color:"#fff",border:"none",borderRadius:"10px",fontWeight:"700",fontSize:"15px"}}>
+              Next: Enter Conditions →
+            </button>
+          </div>
+        )}
+
+        {step===2&&(
+          <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"28px"}}>
+            <div style={{fontSize:"17px",fontWeight:"700",color:"#111827",marginBottom:"6px"}}>Current field conditions</div>
+            <div style={{fontSize:"13px",color:GRAY,marginBottom:"22px"}}>Adjust sliders to match your farm right now.</div>
+            <div style={{background:"#f0fdf4",border:"1px solid #a7f3d0",borderRadius:"12px",padding:"16px",marginBottom:"20px"}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}}>
+                <div style={{fontSize:"13px",fontWeight:"700",color:"#065f46"}}>Soil Moisture Status</div>
+                <div style={{fontSize:"13px",fontWeight:"800",color:irrColor}}>{irrStatus}</div>
+              </div>
+              <SliderRow label="Current Soil Moisture (m³/m³)" value={th} onChange={setTh} min={0.10} max={0.44} step={0.01} display={th.toFixed(2)}/>
+              <div style={{display:"flex",gap:"4px",marginTop:"6px"}}>
+                {[["Wilting",soil.wp,"#dc2626"],["Field cap",soil.fc,"#059669"],["Saturation",soil.sat,"#0d9488"]].map(function(m){
+                  return(<div key={m[0]} style={{flex:"1",background:"#fff",border:"1px solid #d1fae5",borderRadius:"6px",padding:"5px",textAlign:"center"}}>
+                    <div style={{fontSize:"9px",color:GRAY}}>{m[0]}</div>
+                    <div style={{fontSize:"12px",fontWeight:"700",color:m[2],fontFamily:"monospace"}}>{m[1].toFixed(2)}</div>
+                  </div>);
+                })}
+              </div>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px",marginBottom:"16px"}}>
+              <div>
+                <SliderRow label="Temperature (°C)" value={temp} onChange={setTemp} min={-5} max={50} step={1} display={temp+"°C"}/>
+                <SliderRow label="Rainfall (mm/month)" value={rain} onChange={setRain} min={0} max={400} step={5} display={rain+" mm"}/>
+              </div>
+              <div>
+                <SliderRow label="Wind Speed (km/h)" value={wind} onChange={setWind} min={0} max={80} step={1} display={wind+" km/h"}/>
+                <SliderRow label="Humidity (%)" value={rh} onChange={setRh} min={10} max={100} step={5} display={rh+"%"}/>
+              </div>
+            </div>
+            <div style={{background:"#f9fafb",border:"1px solid #e5e7eb",borderRadius:"8px",padding:"12px",marginBottom:"20px",display:"flex",gap:"20px",flexWrap:"wrap"}}>
+              <div><span style={{fontSize:"12px",color:GRAY}}>Reference ET₀: </span><strong style={{color:GREEN,fontFamily:"monospace",fontSize:"13px"}}>{eto.toFixed(2)} mm/day</strong></div>
+              <div><span style={{fontSize:"12px",color:GRAY}}>Crop ET: </span><strong style={{color:GREEN,fontFamily:"monospace",fontSize:"13px"}}>{(eto*crop.kc).toFixed(2)} mm/day</strong></div>
+              <div><span style={{fontSize:"12px",color:GRAY}}>Deficit: </span><strong style={{color:deficit>0?"#f97316":GREEN,fontFamily:"monospace",fontSize:"13px"}}>{deficit>0?deficit.toFixed(3)+" m³/m³":"None"}</strong></div>
+            </div>
+            <div style={{display:"flex",gap:"10px"}}>
+              <button onClick={function(){setStep(1);}} style={{padding:"14px 20px",background:"#fff",color:GRAY,border:"1px solid #e5e7eb",borderRadius:"10px",fontWeight:"600",fontSize:"14px"}}>← Back</button>
+              <button onClick={runForecast} disabled={loading} style={{flex:"1",padding:"14px",background:loading?"#6ee7b7":GREEN,color:"#fff",border:"none",borderRadius:"10px",fontWeight:"700",fontSize:"15px"}}>
+                {loading?"Running Neural MPC…":"Run 7-Day Forecast →"}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step===3&&(
+          <div>
+            <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"28px",marginBottom:"16px"}}>
+              <div style={{fontSize:"17px",fontWeight:"700",color:"#111827",marginBottom:"4px"}}>7-Day FNO Soil Moisture Forecast</div>
+              <div style={{fontSize:"12px",color:GRAY,marginBottom:"14px"}}>
+                <span style={{color:GREEN,fontWeight:"700"}}>■ Neural MPC</span>{"  "}
+                <span style={{color:"#f87171",fontWeight:"700"}}>── Threshold</span>{"  "}
+                <span style={{color:"#6ee7b7",fontWeight:"700"}}>▒ 90% CI</span>
+              </div>
+              <ForecastCanvas mpc={mpc} thr={thr} bands={bands} sk={sk} ck={ck}/>
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"10px",marginBottom:"16px"}}>
+              <Stat val={th.toFixed(3)} label="Soil moisture" sub="m³/m³ now"/>
+              <Stat val={deficit>0?"-"+deficit.toFixed(3):"0.000"} label="Deficit" sub="vs crop target"/>
+              <Stat val={savPct.toFixed(1)+"%"} label="Predicted saving" sub="vs threshold ctrl"/>
+              <Stat val={mpc.length?mpc[mpc.length-1].toFixed(3):"—"} label="Day 7 moisture" sub="Neural MPC"/>
+            </div>
+            <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"28px",marginBottom:"16px"}}>
+              <div style={{fontSize:"14px",fontWeight:"700",color:"#111827",marginBottom:"14px"}}>Day-by-Day Comparison</div>
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:"13px"}}>
+                <thead>
+                  <tr>{["Day","Neural MPC","Threshold","Diff","Status"].map(function(h){return<th key={h} style={{background:"#f0fdf4",color:"#374151",fontWeight:"700",padding:"8px 10px",textAlign:"left",fontSize:"11px",borderBottom:"1px solid #a7f3d0"}}>{h}</th>;})}</tr>
+                </thead>
+                <tbody>
+                  {mpc.map(function(v,i){
+                    var tv=thr[i]||0,diff=v-tv;
+                    var st=v<soil.wp+0.01?"Wilting risk":v<crop.tgt-0.03?"Deficit":v<crop.tgt?"Low":"Optimal";
+                    var stc=v<soil.wp+0.01?"#dc2626":v<crop.tgt-0.03?"#f97316":v<crop.tgt?"#0d9488":GREEN;
+                    return(<tr key={i} style={{background:i%2===0?"#fafafa":"#fff"}}>
+                      <td style={{padding:"8px 10px",color:"#374151",fontWeight:"600"}}>Day {i}</td>
+                      <td style={{padding:"8px 10px",color:GREEN,fontWeight:"700",fontFamily:"monospace"}}>{v.toFixed(3)}</td>
+                      <td style={{padding:"8px 10px",color:"#f87171",fontFamily:"monospace"}}>{tv.toFixed(3)}</td>
+                      <td style={{padding:"8px 10px",fontFamily:"monospace",color:diff>0?"#059669":"#f97316"}}>{diff>0?"+":""}{diff.toFixed(3)}</td>
+                      <td style={{padding:"8px 10px"}}><span style={{background:stc+"22",color:stc,borderRadius:"4px",padding:"2px 8px",fontSize:"11px",fontWeight:"700"}}>{st}</span></td>
+                    </tr>);
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <div style={{display:"flex",gap:"10px"}}>
+              <button onClick={function(){setStep(2);}} style={{padding:"13px 20px",background:"#fff",color:GRAY,border:"1px solid #e5e7eb",borderRadius:"10px",fontWeight:"600",fontSize:"14px"}}>← Adjust</button>
+              <button onClick={function(){setStep(4);}} style={{flex:"1",padding:"13px",background:GREEN,color:"#fff",border:"none",borderRadius:"10px",fontWeight:"700",fontSize:"15px"}}>See Economic Impact →</button>
+            </div>
+          </div>
+        )}
+
+        {step===4&&(
+          <div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginBottom:"14px"}}>
+              <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"24px"}}>
+                <div style={{fontSize:"14px",fontWeight:"700",color:"#111827",marginBottom:"14px"}}>Annual Impact — {ha} ha</div>
+                {[["Region",reg],["Crop",ck+" on "+sk],["Baseline water",(ha*rd.base).toLocaleString()+" m³/yr"],["Predicted saving",savPct.toFixed(1)+"%"],["Water saved",wSaved.toLocaleString()+" m³/yr"],["Cost saved","$"+cSaved.toLocaleString()+"/yr"],["Water price","$"+rd.cost+"/m³"]].map(function(row){
+                  return(<div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f3f4f6",fontSize:"13px"}}>
+                    <span style={{color:GRAY}}>{row[0]}</span>
+                    <span style={{fontWeight:"700",color:GREEN}}>{row[1]}</span>
+                  </div>);
+                })}
+              </div>
+              <div style={{background:"#fff",border:"1px solid #e5e7eb",borderRadius:"16px",padding:"24px"}}>
+                <div style={{fontSize:"14px",fontWeight:"700",color:"#111827",marginBottom:"14px"}}>Scale-Up Impact</div>
+                {[[10,"Smallholder"],[100,"Mid-size"],[10000,"Regional"],[500000,"National"]].map(function(item){
+                  var sz=item[0],lbl=item[1];
+                  var w=Math.round(sz*rd.base*savPct/100),c=Math.round(w*rd.cost);
+                  return(<div key={sz} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:"1px solid #f3f4f6"}}>
+                    <div>
+                      <div style={{fontSize:"13px",fontWeight:"600",color:"#374151"}}>{lbl}</div>
+                      <div style={{fontSize:"11px",color:GRAY}}>{sz.toLocaleString()} ha</div>
+                    </div>
+                    <div style={{textAlign:"right"}}>
+                      <div style={{fontSize:"11px",color:TEAL,fontWeight:"700"}}>{w>=1e6?(w/1e6).toFixed(1)+"M":w.toLocaleString()} m³/yr</div>
+                      <div style={{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:"700",color:GREEN}}>${c>=1e6?(c/1e6).toFixed(0)+"M":c.toLocaleString()}/yr</div>
+                    </div>
+                  </div>);
+                })}
+              </div>
+            </div>
+            <div style={{display:"flex",gap:"10px"}}>
+              <button onClick={function(){setStep(3);}} style={{padding:"13px 20px",background:"#fff",color:GRAY,border:"1px solid #e5e7eb",borderRadius:"10px",fontWeight:"600",fontSize:"14px"}}>← Forecast</button>
+              <button onClick={function(){setStep(1);setMpc([]);setThr([]);setBands([]);}} style={{flex:"1",padding:"13px",background:"#064e3b",color:"#fff",border:"none",borderRadius:"10px",fontWeight:"700",fontSize:"15px"}}>Start New Analysis</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── RESEARCH PAGE ─────────────────────────────────────────────────────────────
+function ResearchPage(props){
+  var _tab=useState("results");var tab=_tab[0];var setTab=_tab[1];
+  var _mr=useState(0);var mr=_mr[0];var setMr=_mr[1];
+  var TABS=[{id:"results",label:"Math Results"},{id:"experiment",label:"Experiment"},{id:"global",label:"Global Sites"}];
+  var m=MR[mr];
+  return(
+    <div>
+      <InnerHero label="Science Fair 2026" title="Research" sub="Mathematical results, hardware experiment, and global validation." tabs={TABS} activeTab={tab} onTab={setTab}/>
+      <div style={{maxWidth:"1060px",margin:"0 auto",padding:"32px 40px 72px"}}>
+        {tab==="results"&&(
+          <div>
+            <div style={{display:"flex",gap:"6px",flexWrap:"wrap",marginBottom:"20px"}}>
+              {MR.map(function(item,i){
+                return(<button key={item.id} onClick={function(){setMr(i);}}
+                  style={{background:mr===i?GREEN:"#fff",color:mr===i?"#fff":GRAY,border:"1px solid "+(mr===i?GREEN:"#e5e7eb"),borderRadius:"7px",padding:"5px 12px",fontSize:"12px",fontWeight:"700",fontFamily:"inherit"}}>{item.tag}</button>);
+              })}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px"}}>
+              <Card title="">
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:"64px",fontWeight:"700",color:"#6ee7b7",lineHeight:"1",marginBottom:"-8px"}}>{"0"+m.id}</div>
+                <div style={{fontSize:"20px",fontWeight:"800",color:"#111827",marginBottom:"6px"}}>{m.title}</div>
+                <Tag green>{m.badge}</Tag>
+                <div style={{background:"#f0fdf4",border:"1px solid "+BORDER,borderLeft:"3px solid "+GREEN,borderRadius:"8px",padding:"14px",marginTop:"16px"}}>
+                  <div style={{fontSize:"10px",color:GRAY,fontWeight:"700",textTransform:"uppercase",letterSpacing:"0.5px",marginBottom:"8px"}}>Theoretical Claim</div>
+                  <KatexMath latex={m.latex}/>
+                  <div style={{fontSize:"12px",color:GRAY,marginTop:"8px"}}>{m.note}</div>
+                </div>
+              </Card>
+              <Card title="Numerical Findings">
+                {m.rows.map(function(row){return(<div key={row[0]} style={{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid #f3f4f6",fontSize:"13px"}}><span style={{color:GRAY}}>{row[0]}</span><span style={{fontWeight:"700",color:GREEN,fontFamily:"monospace"}}>{row[1]}</span></div>);})}
+                <div style={{background:"#f0fdf4",border:"1px solid "+BORDER,borderRadius:"8px",padding:"12px",marginTop:"14px"}}>
+                  <div style={{fontSize:"11px",fontWeight:"700",color:"#374151",marginBottom:"5px"}}>Interpretation</div>
+                  <div style={{fontSize:"13px",color:GRAY,lineHeight:"1.7"}}>{m.insight}</div>
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+        {tab==="experiment"&&(
+          <div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px",marginBottom:"20px"}}>
+              {[["33.4%","Water saved"],["36%","Less irrigations"],["0","Wilting events"],["p<0.05","Significant"]].map(function(item){return<Stat key={item[1]} val={item[0]} label={item[1]}/>;}) }
+            </div>
+            <div style={{background:"#fefce8",border:"1px solid #fde68a",borderRadius:"8px",padding:"10px 14px",fontSize:"13px",color:"#92400e",marginBottom:"16px"}}>Note: Sensors not live — showing recorded data from Feb 3–16, 2026 experiment.</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"16px"}}>
+              {PLANTS.map(function(p,i){
+                var col=p.mpc?GREEN:"#f97316";
+                return(<div key={i} style={{background:"#fff",border:"1px solid "+(p.mpc?BORDER:"#fed7aa"),borderRadius:"12px",padding:"18px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:"12px"}}>
+                    <div>
+                      <div style={{fontSize:"14px",fontWeight:"700",color:"#111827"}}>{p.name} — {p.group}</div>
+                      <div style={{fontSize:"12px",color:col,fontWeight:"600",marginTop:"2px"}}>{p.mpc?"Neural MPC":"Threshold control"}</div>
+                    </div>
+                    <Tag green={p.mpc}>{p.group}</Tag>
+                  </div>
+                  <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"10px"}}>
+                    <div><div style={{fontSize:"10px",color:GRAY}}>Final moisture</div><div style={{fontSize:"14px",fontWeight:"700"}}>{p.tf.toFixed(2)} m³/m³</div></div>
+                    <div><div style={{fontSize:"10px",color:GRAY}}>Total water</div><div style={{fontSize:"14px",fontWeight:"700"}}>{p.water} mL</div></div>
+                  </div>
+                  <MiniGraph data={p.hist} color={col} h={32}/>
+                  <div style={{fontSize:"10px",color:GRAY,marginTop:"3px"}}>14-day moisture history</div>
+                </div>);
+              })}
+            </div>
+            <Card title="Full Results Table">
+              <table style={{width:"100%",borderCollapse:"collapse",fontSize:"13px"}}>
+                <thead><tr>{["Metric","Control","Neural MPC","Change"].map(function(h){return<th key={h} style={{background:"#f0fdf4",color:"#374151",fontWeight:"700",padding:"9px 10px",textAlign:"left",fontSize:"12px",borderBottom:"1px solid "+BORDER}}>{h}</th>;})}</tr></thead>
+                <tbody>
+                  {[["Total water","109.0 mL","72.6 mL","−33.4%"],["Irrigations","22","14","−36.4%"],["Time below optimal","18.2%","4.1%","−77.5%"],["Min moisture","0.18","0.20","+11.1%"],["Final height","23.1 cm","23.5 cm","+0.4 cm"],["Wilting events","0","0","Same"]].map(function(row){
+                    return(<tr key={row[0]}>{[row[0],row[1],row[2]].map(function(v){return<td key={v} style={{padding:"9px 10px",borderBottom:"1px solid #f9fafb",color:"#374151"}}>{v}</td>;})}
+                      <td style={{padding:"9px 10px",borderBottom:"1px solid #f9fafb",fontWeight:"700",color:GREEN}}>{row[3]}</td></tr>);
+                  })}
+                </tbody>
+              </table>
+            </Card>
+          </div>
+        )}
+        {tab==="global"&&(
+          <div style={{display:"grid",gridTemplateColumns:"2fr 1fr",gap:"16px"}}>
+            <Card title="Water Savings by Site">
+              {SITES.map(function(s){
+                var col=s.s>25?GREEN:s.s>15?TEAL:"#f97316";
+                return(<div key={s.name} style={{marginBottom:"12px"}}>
+                  <div style={{display:"flex",justifyContent:"space-between",marginBottom:"4px"}}>
+                    <div><div style={{fontSize:"13px",fontWeight:"600",color:"#111827"}}>{s.name}</div><div style={{fontSize:"11px",color:GRAY}}>{s.crop}</div></div>
+                    <span style={{fontWeight:"800",color:col,fontSize:"14px",fontFamily:"monospace"}}>{s.s}%</span>
+                  </div>
+                  <div style={{height:"5px",background:"#f0f0f0",borderRadius:"3px"}}><div style={{width:(s.s/40*100)+"%",height:"100%",background:col,borderRadius:"3px"}}/></div>
+                </div>);
+              })}
+            </Card>
+            <Card title="By Continent">
+              {[["Oceania",36.3,"1 site"],["N. America",32.4,"3 sites"],["Africa",25.6,"2 sites"],["S. America",23.8,"2 sites"],["Europe",22.8,"2 sites"],["Asia",14.6,"4 sites"]].map(function(item){
+                var col=item[1]>25?GREEN:item[1]>20?TEAL:"#f97316";
+                return(<div key={item[0]} style={{display:"flex",alignItems:"center",gap:"10px",padding:"8px 0",borderBottom:"1px solid #f3f4f6"}}>
+                  <div style={{flex:"1"}}>
+                    <div style={{fontSize:"12px",fontWeight:"600",color:"#111827"}}>{item[0]}</div>
+                    <div style={{fontSize:"10px",color:GRAY}}>{item[2]}</div>
+                    <div style={{height:"4px",background:"#f0f0f0",borderRadius:"2px",marginTop:"4px"}}><div style={{width:(item[1]/40*100)+"%",height:"100%",background:col,borderRadius:"2px"}}/></div>
+                  </div>
+                  <span style={{fontFamily:"'Playfair Display',serif",fontSize:"15px",fontWeight:"700",color:col}}>{item[1]}%</span>
+                </div>);
+              })}
+            </Card>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── COMMUNITY PAGE ─────────────────────────────────────────────────────────────
+function CommunityPage(){
+  var _posts=useState(POSTS);var posts=_posts[0];var setPosts=_posts[1];
+  var _draft=useState("");var draft=_draft[0];var setDraft=_draft[1];
+  var _tag=useState("Discussion");var draftTag=_tag[0];var setDraftTag=_tag[1];
+  function post(){
+    if(!draft.trim())return;
+    var newPost={user:"You",role:"WaterWise User",ago:"just now",tag:draftTag,text:draft,likes:0,liked:false};
+    setPosts([newPost].concat(posts));setDraft("");
+  }
+  return(
+    <div>
+      <InnerHero label="Discussion" title="Community" sub="Farmers, engineers, and researchers sharing what works in the field."/>
+      <div style={{maxWidth:"1060px",margin:"0 auto",padding:"32px 40px 72px"}}>
+        <Card title="Share with the community">
+          <textarea value={draft} onChange={function(e){setDraft(e.target.value);}} placeholder="Ask a question, share a field result, or discuss the research..."
+            style={{width:"100%",padding:"10px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",outline:"none",resize:"vertical",minHeight:"80px",fontFamily:"inherit"}}/>
+          <div style={{display:"flex",gap:"10px",marginTop:"10px"}}>
+            <select value={draftTag} onChange={function(e){setDraftTag(e.target.value);}} style={{padding:"8px 10px",border:"1px solid #e5e7eb",borderRadius:"8px",fontSize:"13px",background:"#fafafa",outline:"none",fontFamily:"inherit"}}>
+              {["Discussion","Research","Field Work","Question","Smallholders"].map(function(opt){return<option key={opt}>{opt}</option>;})}
+            </select>
+            <button onClick={post} style={{flex:"1",background:GREEN,color:"#fff",border:"none",borderRadius:"8px",padding:"9px",fontWeight:"700",fontSize:"14px"}}>Post</button>
+          </div>
+        </Card>
+        <div style={{marginTop:"16px",display:"flex",flexDirection:"column",gap:"12px"}}>
+          {posts.map(function(p,i){
+            return(<div key={i} style={{background:"#fff",borderRadius:"12px",padding:"18px",border:"1px solid #e5e7eb"}}>
+              <div style={{display:"flex",gap:"10px",marginBottom:"10px"}}>
+                <div style={{width:"40px",height:"40px",background:"linear-gradient(135deg,"+TEAL+","+GREEN+")",borderRadius:"10px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0",fontSize:"16px",color:"#fff",fontWeight:"700"}}>{p.user.charAt(0)}</div>
+                <div style={{flex:"1",display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:"4px"}}>
+                  <div><div style={{fontSize:"14px",fontWeight:"700",color:"#111827"}}>{p.user}</div><div style={{fontSize:"12px",color:GRAY}}>{p.role}</div></div>
+                  <div style={{display:"flex",gap:"6px",alignItems:"center"}}><Tag green>{p.tag}</Tag><span style={{fontSize:"11px",color:"#9ca3af"}}>{p.ago}</span></div>
+                </div>
+              </div>
+              <div style={{fontSize:"14px",color:"#374151",lineHeight:"1.7",marginBottom:"10px"}}>{p.text}</div>
+              <button onClick={function(){setPosts(posts.map(function(x,j){if(j!==i)return x;return{user:x.user,role:x.role,ago:x.ago,tag:x.tag,text:x.text,likes:x.liked?x.likes-1:x.likes+1,liked:!x.liked};}));}}
+                style={{background:"none",border:"none",fontSize:"13px",fontWeight:"600",color:p.liked?GREEN:GRAY,fontFamily:"inherit"}}>
+                {p.liked?"Liked":"Like"} {p.likes}
+              </button>
+            </div>);
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── LEARN PAGE ─────────────────────────────────────────────────────────────────
+function LearnPage(){
+  var _lesson=useState(null);var lesson=_lesson[0];var setLesson=_lesson[1];
+  var LESSONS=[
+    {id:1,title:"Why Smart Irrigation?",level:"Beginner",mins:4,body:"Agriculture uses 70% of all freshwater globally. Most farms irrigate on fixed schedules or react only when soil gets dry, wasting water when rain is coming.\n\nWaterWise predicts soil moisture 7 days ahead and plans accordingly. Like a weather forecast for your root zone.\n\nResult: 24–36% less water used, zero impact on yield, runs on $60 of hardware."},
+    {id:2,title:"How Soil Water Works",level:"Beginner",mins:6,body:"Soil moisture (θ) is measured in m³ of water per m³ of soil. Three key thresholds:\n\n- Saturation (~0.45): All pores full. Runoff and root damage risk.\n- Field Capacity (~0.30): Ideal. Water held against gravity.\n- Wilting Point (~0.20): Plant cannot extract water. Permanent damage.\n\nWater movement follows the Richards equation:\n\n  ∂θ/∂t = ∇·[K(θ)·∇ψ] + S\n\nThis is nonlinear and expensive to solve, which is why WaterWise uses a neural network."},
+    {id:3,title:"The Neural Prediction Model",level:"Intermediate",mins:8,body:"A Fourier Neural Operator (FNO) learns the mapping G: θ(x,0) → θ(x,t).\n\nSteps:\n1. Input soil moisture → Fast Fourier Transform\n2. Learned weights multiply top 12 frequency modes\n3. Inverse FFT back to spatial domain\n4. Add local linear bypass\n5. Repeat for 4 layers\n\nTrained on 9 years of NASA SMAP data (2015–2024).\nInference: ~3ms vs ~4 hours for numerical solver.\nValidated: slope −1.34 (theory −1.5), R²=0.927."},
+    {id:4,title:"Handling Uncertainty",level:"Intermediate",mins:7,body:"Real soil is not uniform. WaterWise adds stochastic noise:\n\n  dθ = f(θ)dt + σ(x,θ)dW(t)\n\nWhere W(t) is Brownian motion and σ is a learned noise function.\n\nThis gives probabilistic forecasts: not just 'θ will be 0.28' but '0.28 ± 0.025 with 90% confidence.'\n\n500 Monte Carlo samples take ~1.5 seconds. KL = 0.047 validates the uncertainty structure."},
+    {id:5,title:"The Irrigation Controller",level:"Advanced",mins:9,body:"Threshold control: irrigate when θ < 0.25. Simple but wasteful.\n\nModel Predictive Control (MPC): every 12 hours, solve:\n\n  min E[ Σ α·u² + β·(θ − θ*)² ]\n  subject to P(θ ≥ θ_crit) ≥ 0.95\n\n1. FNO gives 7-day forecast (500 Monte Carlo paths)\n2. MPC solves the optimization\n3. Only first command applied (receding horizon)\n4. Re-optimize next step\n\nResult: 36% fewer events, 33% less water, zero wilting events."}
+  ];
+  if(lesson!==null){
+    var L=LESSONS[lesson];
+    return(<div>
+      <InnerHero label="Education" title={L.title} sub={L.level+" — "+L.mins+" min read"}/>
+      <div style={{maxWidth:"680px",margin:"0 auto",padding:"32px 40px 72px"}}>
+        <button onClick={function(){setLesson(null);}} style={{background:"none",color:GREEN,border:"1px solid "+BORDER,borderRadius:"8px",padding:"7px 16px",fontWeight:"600",fontSize:"13px",marginBottom:"20px",fontFamily:"inherit"}}>← Back to Lessons</button>
+        <Card title=""><div style={{fontSize:"13px",color:"#374151",lineHeight:"2.1",whiteSpace:"pre-line",fontFamily:"monospace"}}>{L.body}</div></Card>
+        <div style={{display:"flex",gap:"10px",marginTop:"16px"}}>
+          {lesson>0&&<button onClick={function(){setLesson(lesson-1);}} style={{background:"none",color:GREEN,border:"1px solid "+BORDER,borderRadius:"8px",padding:"9px 18px",fontWeight:"700",fontSize:"14px",fontFamily:"inherit"}}>Previous</button>}
+          {lesson<LESSONS.length-1&&<button onClick={function(){setLesson(lesson+1);}} style={{background:GREEN,color:"#fff",border:"none",borderRadius:"8px",padding:"9px 18px",fontWeight:"700",fontSize:"14px",fontFamily:"inherit"}}>Next Lesson</button>}
+        </div>
+      </div>
+    </div>);
+  }
+  return(<div>
+    <InnerHero label="Education" title="How WaterWise Works" sub="From soil physics to neural operators. No prior knowledge needed."/>
+    <div style={{maxWidth:"1060px",margin:"0 auto",padding:"32px 40px 72px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+        {LESSONS.map(function(l,i){
+          return(<div key={l.id} style={{background:"#fff",borderRadius:"12px",padding:"20px",border:"1px solid #e5e7eb",cursor:"pointer"}} onClick={function(){setLesson(i);}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:"10px"}}>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:"28px",fontWeight:"700",color:"#6ee7b7"}}>{"0"+l.id}</div>
+              <div style={{display:"flex",gap:"6px"}}><Tag green>{l.mins+" min"}</Tag><Tag>{l.level}</Tag></div>
+            </div>
+            <div style={{fontSize:"15px",fontWeight:"700",color:"#111827",marginBottom:"6px"}}>{l.title}</div>
+            <div style={{fontSize:"13px",color:GREEN,fontWeight:"600"}}>Read lesson →</div>
+          </div>);
+        })}
+      </div>
+    </div>
+  </div>);
+}
+
+// ── ABOUT & IMPACT ─────────────────────────────────────────────────────────────
+function AboutPage(){
+  return(<div>
+    <InnerHero label="Our Story" title="Water should not be a gamble." sub="Why WaterWise was built, and the Kentucky drought that made it necessary."/>
+    <div style={{maxWidth:"1060px",margin:"0 auto",padding:"32px 40px 72px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"40px",alignItems:"start"}}>
+        <div>
+          <p style={{fontSize:"15px",color:GRAY,lineHeight:"1.85",marginBottom:"16px"}}>My grandfather has farmed in Kentucky his whole life. He has spent decades reading the land — knowing when rain is coming, when to hold off, when the soil has what it needs. That knowledge, built slowly over a lifetime, is exactly what is under threat as Kentucky's weather becomes less predictable.</p>
+          <p style={{fontSize:"15px",color:GRAY,lineHeight:"1.85",marginBottom:"16px"}}>In 2022 and 2023, over 60% of Kentucky was classified under severe to extreme drought. The Green River Basin saw months with less than 40% of normal rainfall. Crops that relied on summer rains suddenly needed irrigation that was not in the budget.</p>
+          <p style={{fontSize:"15px",color:GRAY,lineHeight:"1.85",marginBottom:"24px"}}>WaterWise was built as an answer to that — using the same AI techniques used in weather forecasting, validated on hardware any farmer can afford.</p>
+          <div style={{background:"#f0fdf4",border:"1px solid "+BORDER,borderLeft:"3px solid "+GREEN,borderRadius:"8px",padding:"16px"}}>
+            <div style={{fontSize:"14px",fontStyle:"italic",color:"#374151",lineHeight:"1.8"}}>"The goal is not to replace the farmer. It is to give every farmer the ability to read what is coming — backed by data and math that never sleeps."</div>
+          </div>
+        </div>
+        <div>
+          <div style={{background:"linear-gradient(135deg,"+GREEN+","+TEAL+")",borderRadius:"16px",padding:"32px",color:"#fff",marginBottom:"16px"}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:"700",marginBottom:"16px"}}>The bigger picture</div>
+            <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px"}}>
+              {[["70%","of freshwater used by agriculture"],["1.2B","people in severe water scarcity"],["40%","of food depends on irrigation"],["2050","demand up 55% by"]].map(function(item){
+                return(<div key={item[0]} style={{background:"rgba(255,255,255,0.15)",borderRadius:"10px",padding:"12px"}}>
+                  <div style={{fontFamily:"'Playfair Display',serif",fontSize:"20px",fontWeight:"700",color:"#a7f3d0"}}>{item[0]}</div>
+                  <div style={{fontSize:"11px",opacity:"0.8",marginTop:"3px",lineHeight:"1.4"}}>{item[1]}</div>
+                </div>);
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>);
+}
+
+function ImpactPage(){
+  return(<div>
+    <InnerHero label="Real-World Impact" title="What saving water really means." sub="At 500,000 hectares, WaterWise saves 660 million cubic metres of water per year."/>
+    <div style={{maxWidth:"1060px",margin:"0 auto",padding:"32px 40px 72px"}}>
+      <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"12px",marginBottom:"28px"}}>
+        {[["660M m³","Water saved/yr","At 500K ha"],["$99M","Annual savings","At 500K ha"],["244K t","CO₂ reduced","Less pumping"],["14 sites","Validated","6 continents"]].map(function(item){
+          return(<div key={item[1]} style={{background:"#fff",border:"1px solid "+BORDER,borderRadius:"14px",padding:"20px 12px",textAlign:"center"}}>
+            <div style={{fontFamily:"'Playfair Display',serif",fontSize:"22px",fontWeight:"700",color:GREEN}}>{item[0]}</div>
+            <div style={{fontSize:"12px",fontWeight:"600",color:"#374151",marginTop:"5px"}}>{item[1]}</div>
+            <div style={{fontSize:"11px",color:GRAY,marginTop:"2px"}}>{item[2]}</div>
+          </div>);
+        })}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"16px"}}>
+        <Card title="Farm-level savings (Kentucky)">
+          <div style={{fontSize:"12px",color:GRAY,marginBottom:"12px"}}>8,000 m³/ha baseline, $0.22/m³, 34% savings</div>
+          {[[10,"Smallholder","Family farm"],[100,"Mid-size","Commercial"],[1000,"Large farm","Producer"],[10000,"Cooperative","Regional"]].map(function(item){
+            var ha=item[0],label=item[1],desc=item[2];
+            var saved=Math.round(ha*8000*0.34),dollars=Math.round(saved*0.22);
+            return(<div key={ha} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"9px 0",borderBottom:"1px solid #f3f4f6"}}>
+              <div><div style={{fontSize:"13px",fontWeight:"600",color:"#374151"}}>{label}</div><div style={{fontSize:"11px",color:GRAY}}>{desc} — {ha.toLocaleString()} ha</div></div>
+              <div style={{textAlign:"right"}}>
+                <div style={{fontSize:"11px",color:TEAL,fontWeight:"700"}}>{(saved/1000).toFixed(0)}K m³/yr</div>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:"16px",fontWeight:"700",color:GREEN}}>${dollars.toLocaleString()}/yr</div>
+              </div>
+            </div>);
+          })}
+        </Card>
+        <Card title="Kentucky Drought Context">
+          <p style={{fontSize:"14px",color:GRAY,lineHeight:"1.8",marginBottom:"14px"}}>In 2022–2023, more than 60% of Kentucky was under severe drought. River levels dropped to multi-decade lows.</p>
+          {[["60%+","of KY under drought","2022–2023"],["40% below","normal rainfall","Central KY, summer 2023"],["$380M+","estimated crop losses","KY drought damage"]].map(function(item){
+            return(<div key={item[0]} style={{background:"#fff7ed",border:"1px solid #fed7aa",borderRadius:"8px",padding:"10px",marginBottom:"8px"}}>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:"18px",fontWeight:"700",color:"#f97316"}}>{item[0]}</div>
+              <div style={{fontSize:"12px",fontWeight:"600",color:"#92400e",marginTop:"2px"}}>{item[1]}</div>
+              <div style={{fontSize:"10px",color:GRAY,marginTop:"1px"}}>{item[2]}</div>
+            </div>);
+          })}
+        </Card>
+      </div>
+    </div>
+  </div>);
+}
+
+// ── HOME PAGE ─────────────────────────────────────────────────────────────────
+function HomePage(props){
+  var t = props.t;
+  return(<div>
+    <div style={{minHeight:"100vh",display:"flex",flexDirection:"column",background:"linear-gradient(150deg,#064e3b 0%,#0d9488 50%,#059669 100%)",position:"relative"}}>
+      <div style={{position:"absolute",inset:"0",backgroundImage:"radial-gradient(circle,rgba(255,255,255,0.06) 1px,transparent 1px)",backgroundSize:"36px 36px"}}/>
+      <div style={{flex:"1",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",textAlign:"center",padding:"120px 24px 40px",position:"relative",zIndex:"1"}}>
+        <div style={{display:"inline-flex",alignItems:"center",gap:"7px",background:"rgba(255,255,255,0.15)",border:"1px solid rgba(255,255,255,0.25)",borderRadius:"999px",padding:"5px 16px",fontSize:"11px",fontWeight:"700",letterSpacing:"1.5px",textTransform:"uppercase",color:"rgba(255,255,255,0.9)",marginBottom:"24px"}}>
+          {t.hero_badge}
+        </div>
+        <h1 style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(42px,8vw,88px)",fontWeight:"700",color:"#fff",lineHeight:"1.0",letterSpacing:"-2px",marginBottom:"20px",maxWidth:"900px"}}>
+          {t.hero_h1a}<br/><span style={{color:"#a7f3d0"}}>{t.hero_h1b}</span>
+        </h1>
+        <p style={{fontSize:"clamp(15px,2vw,18px)",color:"rgba(255,255,255,0.8)",lineHeight:"1.7",maxWidth:"540px",marginBottom:"36px"}}>{t.hero_sub}</p>
+        <div style={{display:"flex",gap:"12px",flexWrap:"wrap",justifyContent:"center",marginBottom:"52px"}}>
+          <button onClick={props.onAnalyze} style={{background:GREEN,color:"#fff",border:"none",borderRadius:"12px",padding:"14px 32px",fontWeight:"700",fontSize:"16px",boxShadow:"0 4px 16px rgba(5,150,105,0.4)"}}>{t.hero_cta1}</button>
+          <button onClick={function(){props.go("about");}} style={{background:"rgba(255,255,255,0.15)",color:"#fff",border:"1px solid rgba(255,255,255,0.3)",borderRadius:"12px",padding:"14px 32px",fontWeight:"600",fontSize:"16px"}}>{t.hero_cta2}</button>
+        </div>
+        <div style={{display:"flex",gap:"48px",flexWrap:"wrap",justifyContent:"center"}}>
+          {[["33.4%",t.hero_stat1],["14 sites",t.hero_stat2],["$60",t.hero_stat3]].map(function(item){
+            return(<div key={item[1]} style={{textAlign:"center"}}>
+              <div style={{fontFamily:"'Playfair Display',serif",fontSize:"28px",fontWeight:"700",color:"#a7f3d0",lineHeight:"1"}}>{item[0]}</div>
+              <div style={{fontSize:"12px",color:"rgba(255,255,255,0.6)",marginTop:"4px",fontWeight:"500"}}>{item[1]}</div>
+            </div>);
+          })}
+        </div>
+      </div>
+      <svg viewBox="0 0 1440 64" style={{display:"block",width:"100%",position:"relative",zIndex:"1"}} xmlns="http://www.w3.org/2000/svg">
+        <path d="M0,32 C360,64 1080,0 1440,32 L1440,64 L0,64 Z" fill="#f9fafb"/>
+      </svg>
+    </div>
+
+    <div style={{background:"#fff",padding:"72px 24px",borderTop:"3px solid #d1fae5"}}>
+      <div style={{maxWidth:"1060px",margin:"0 auto"}}>
+        <div style={{textAlign:"center",marginBottom:"48px"}}>
+          <div style={{fontSize:"11px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:GREEN,marginBottom:"10px"}}>How It Works</div>
+          <div style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(24px,3.5vw,36px)",fontWeight:"700",color:"#111827",letterSpacing:"-0.5px"}}>Predict. Plan. Conserve.</div>
+        </div>
+        <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"36px"}}>
+          {[
+            {n:"01",icon:"M12 2C12 2 4 10 4 15a8 8 0 0 0 16 0C20 10 12 2 12 2z",title:"Soil Forecast",desc:"A Fourier Neural Operator trained on 9 years of NASA SMAP satellite data predicts soil moisture 7 days ahead for your exact soil, crop, and weather conditions."},
+            {n:"02",icon:"M3 12h18M3 6l9-4 9 4M3 18l9 4 9-4",title:"Uncertainty Quantified",desc:"500 Monte Carlo simulations in ~1.5 seconds give 90% confidence intervals. Probabilistic bounds backed by stochastic differential equation theory."},
+            {n:"03",icon:"M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4",title:"Irrigation Planned",desc:"Model Predictive Control minimizes water use while keeping P(soil ≥ wilting point) ≥ 95%. Prevents deficits before they happen, not after."}
+          ].map(function(item){
+            return(<div key={item.n}>
+              <div style={{display:"flex",alignItems:"center",gap:"12px",marginBottom:"14px"}}>
+                <div style={{width:"44px",height:"44px",background:"linear-gradient(135deg,"+TEAL+","+GREEN+")",borderRadius:"12px",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:"0"}}>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round"><path d={item.icon}/></svg>
+                </div>
+                <div style={{fontFamily:"'Playfair Display',serif",fontSize:"36px",fontWeight:"700",color:"#d1fae5",lineHeight:"1"}}>{item.n}</div>
+              </div>
+              <div style={{fontSize:"17px",fontWeight:"700",color:"#111827",marginBottom:"8px"}}>{item.title}</div>
+              <div style={{fontSize:"14px",color:GRAY,lineHeight:"1.75"}}>{item.desc}</div>
+            </div>);
+          })}
+        </div>
+      </div>
+    </div>
+
+    <div style={{background:"#ecfdf5",padding:"72px 24px",textAlign:"center"}}>
+      <div style={{fontSize:"11px",fontWeight:"700",letterSpacing:"2px",textTransform:"uppercase",color:GREEN,marginBottom:"10px"}}>Get Started</div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:"clamp(24px,3vw,36px)",fontWeight:"700",color:"#111827",marginBottom:"12px"}}>Ready to use less water?</div>
+      <p style={{fontSize:"15px",color:GRAY,marginBottom:"32px",maxWidth:"400px",margin:"0 auto 32px"}}>Free farm analysis. No setup required.</p>
+      <button onClick={props.onAnalyze} style={{background:GREEN,color:"#fff",border:"none",borderRadius:"12px",padding:"14px 36px",fontWeight:"700",fontSize:"16px",boxShadow:"0 4px 16px rgba(5,150,105,0.3)"}}>{t.hero_cta1}</button>
+    </div>
+
+    <div style={{background:DARK,padding:"28px 40px",textAlign:"center"}}>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:"15px",fontWeight:"700",color:"#fff",marginBottom:"12px"}}>{t.brand}</div>
+      <div style={{display:"flex",justifyContent:"center",gap:"20px",flexWrap:"wrap",marginBottom:"12px"}}>
+        {["home","analysis","research","community","learn","howto","about","impact"].map(function(p){
+          return<button key={p} onClick={function(){props.go(p);}} style={{background:"none",border:"none",fontSize:"12px",color:"rgba(255,255,255,0.35)",textTransform:"capitalize",fontFamily:"inherit"}}>{p}</button>;
+        })}
+      </div>
+      <div style={{fontSize:"11px",color:"rgba(255,255,255,0.2)"}}>{t.footer_copy}</div>
+    </div>
+  </div>);
+}
+
+// ── APP ────────────────────────────────────────────────────────────────────────
+function App(){
+  var _page=useState("home");var page=_page[0];var setPage=_page[1];
+  var _authed=useState(false);var authed=_authed[0];var setAuthed=_authed[1];
+  var _showAuth=useState(false);var showAuth=_showAuth[0];var setShowAuth=_showAuth[1];
+  var _scrolled=useState(false);var scrolled=_scrolled[0];var setScrolled=_scrolled[1];
+  var _lang=useState("en");var lang=_lang[0];var setLang=_lang[1];
+
+  var t = T[lang] || T["en"];
+
+  useEffect(function(){
+    var handler=function(){setScrolled(window.scrollY>60);};
+    window.addEventListener("scroll",handler,{passive:true});
+    return function(){window.removeEventListener("scroll",handler);};
+  },[]);
+
+  function go(p){setPage(p);window.scrollTo({top:0,behavior:"smooth"});}
+  function onAnalyze(){if(!authed){setShowAuth(true);}else{go("analysis");}}
+
+  return(
+    <div style={{minHeight:"100vh"}}>
+      <NavBar page={page} go={go} authed={authed} scrolled={scrolled} t={t} lang={lang} setLang={setLang}
+        showAuth={function(){setShowAuth(true);}}
+        signOut={function(){setAuthed(false);go("home");}}/>
+      {showAuth&&<ModalAuth t={t} onAuth={function(){setAuthed(true);setShowAuth(false);go("analysis");}} onClose={function(){setShowAuth(false);}}/>}
+      {page==="home"&&<HomePage go={go} onAnalyze={onAnalyze} t={t}/>}
+      {page==="analysis"&&<AnalysisPage t={t}/>}
+      {page==="research"&&<ResearchPage t={t}/>}
+      {page==="community"&&<CommunityPage/>}
+      {page==="learn"&&<LearnPage/>}
+      {page==="howto"&&<HowToPage t={t} onAnalyze={onAnalyze}/>}
+      {page==="about"&&<AboutPage/>}
+      {page==="impact"&&<ImpactPage/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(React.createElement(App));
+</script>
+</body>
+</html>
